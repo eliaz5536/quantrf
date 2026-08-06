@@ -1,7 +1,5 @@
 # Quant Research Framework (QRF)
-
 ![alt text](image.png)
-
 Interactive open-source quantitative finance platform for exploring financial models, analysing market data, and visualizations of option pricing and risk analysis using Streamlit.
 
 The project extends and uses **Georgios Drosogiannis** on volatility surface visualisation and interactive Black-Scholes heatmaps, together with **Killa Voillaume's** Options Greek Visualizer.
