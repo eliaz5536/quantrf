@@ -12,8 +12,9 @@ from scipy.interpolate import griddata
 
 st.set_page_config(page_title="Black-Scholes-Merton (1973)", layout="wide")
 st.sidebar.title("Quant Research Framework")
+st.sidebar.page_link(page="", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
-st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=True)
+st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=False)
 st.sidebar.markdown(
     """
     <div style='margin-bottom: 25px;'>

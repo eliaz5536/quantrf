@@ -186,7 +186,7 @@ def get_option_chains_spot(ticker_symbol, retries=3, delay=2):
             calls_all["time_to_expiration"] = calls_all["expiration"].apply(calculate_time_to_expiration)
             calls_all = calls_all[calls_all["time_to_expiration"] > 0.0]
             calls_all = calls_all.reset_index(drop=True)
-
+            
             # For puts_all DataFrame
             puts_all = puts_all[["strike", "lastPrice", "impliedVolatility", "expiration"]]
             puts_all["time_to_expiration"] = puts_all["expiration"].apply(calculate_time_to_expiration)
@@ -442,6 +442,73 @@ def bs_greeks(S, K, T, r, sigma, q=0.0):
         "rho_put": rho_put,
     }
 
+def call_black_value(F, K, r, T, v, q):
+    # Calculates the value of a call option (Black-Scholes formula for call options with dividends)
+    # S is the share price at time T
+    # K is the strike price
+    # r is the risk-free interest rate
+    # T is the time to maturity in years (days/365)
+    # v is the volatility
+    # q is the dividend yield
+
+    d1 = (np.log(F / K) + (0.5 * v**2) * T) / (v * np.sqrt(T))
+    d2 = d1 - v * np.sqrt(T)
+    
+    return np.exp(-r * T) * (F * norm.cdf(d1) - K * norm.cdf(d2))
+
+def put_black_value(F, K, r, T, v, q):
+    # Calculates the value of a put option (Black-Scholes formula for put options with dividends)
+    # The parameters are explained in the Call_BS_Value function
+    d1 = (np.log(F / K) + (0.5 * v**2) * T) / (v * np.sqrt(T))
+    d2 = d1 - v * np.sqrt(T)
+    
+    return np.exp(-r * T) * (K * norm.cdf(-d2) - F * norm.cdf(-d1))
+
+
+def black_greeks(F, K, T, r, sigma, q=0.0):
+    F_arr, K_arr, T_arr, r_arr, sigma_arr, q_arr = np.broadcast_arrays(
+        np.asarray(F, dtype=float),
+        np.asarray(K, dtype=float),
+        np.asarray(T, dtype=float),
+        np.asarray(r, dtype=float),
+        np.asarray(sigma, dtype=float),
+        np.asarray(q, dtype=float),
+    )
+
+    sigma_arr = np.where(sigma_arr <= 1e-8, 1e-8, sigma_arr)
+    T_arr = np.where(T_arr <= 1e-8, 1e-8, T_arr)
+
+    d1 = (np.log(F_arr / K_arr) + (0.5 * sigma_arr**2) * T_arr) / (sigma_arr * np.sqrt(T_arr))
+    d2 = d1 - sigma_arr * np.sqrt(T_arr)
+
+    # Delta (with continuous dividend yield q)
+    delta_call = np.exp(-r_arr * T_arr) * norm.cdf(d1)
+    delta_put = -np.exp(-r_arr * T_arr) * (norm.cdf(d1) - 1.0)
+
+    # Gamma and Vega (both include the exp(-qT) factor for underlying paying dividends)
+    gamma = np.exp(-r_arr * T_arr) * norm.pdf(d1) / (F_arr * sigma_arr * np.sqrt(T_arr))
+    vega = F_arr * np.exp(-r_arr * T_arr) * np.sqrt(T_arr) * norm.pdf(d1)
+
+    # Theta (per year). Include dividend yield contributions for theta.
+    theta_common = -(F_arr * np.exp(-r_arr * T_arr) * norm.pdf(d1) * sigma_arr) / (2.0 * np.sqrt(T_arr))
+    theta_call = theta_common - r_arr * K_arr * np.exp(-r_arr * T_arr) * norm.cdf(d2) + r_arr * F_arr * np.exp(-r_arr * T_arr) * norm.cdf(d1)
+    theta_put = theta_common + r_arr * K_arr * np.exp(-r_arr * T_arr) * norm.cdf(-d2) - r_arr * F_arr * np.exp(-r_arr * T_arr) * norm.cdf(-d1)
+
+    # Rho (interest rate sensitivity)
+    rho_call = -T_arr * np.exp(-r_arr * T_arr) * (F_arr * norm.cdf(d1) - K_arr * norm.cdf(d2))
+    rho_put = -T_arr * np.exp(-r_arr * T_arr) * (K_arr * norm.cdf(-d2) - F_arr * norm.cdf(-d1))
+
+    return {
+        "delta_call": delta_call,
+        "delta_put": delta_put,
+        "gamma": gamma,
+        "vega": vega,
+        "theta_call": theta_call,
+        "theta_put": theta_put,
+        "rho_call": rho_call,
+        "rho_put": rho_put,
+    }
+
 
 
 def calculate_greeks(S, K, r, T, sigma, dividend_yield=0.0):
@@ -472,6 +539,40 @@ def calculate_greeks(S, K, r, T, sigma, dividend_yield=0.0):
         greeks["rho_call"],
         greeks["rho_put"],
     )
+
+
+def calculate_black_greeks(F, K, r, T, sigma, dividend_yield=0.0):
+    """
+    Calculate the Greeks for a European option using the Black (1976) model.
+
+    Parameters:
+    F (float): Futures price
+    K (float): Strike price
+    r (float): Risk-free interest rate (as a decimal)
+    T (float): Time to expiration in years
+    sigma (float): Volatility of the underlying asset (as a decimal)
+    dividend_yield (float): Dividend yield of the underlying asset (as a decimal)
+
+    Returns:
+    tuple: A tuple containing the Greeks in the following order:
+        delta_call, delta_put, gamma, vega, theta_call, theta_put, rho_call, rho_put
+    """
+    # Pass dividend yield through to the underlying BS greeks implementation.
+    greeks = black_greeks(F, K, T, r, sigma, q=dividend_yield)
+    return (
+        greeks["delta_call"],
+        greeks["delta_put"],
+        greeks["gamma"],
+        greeks["vega"],
+        greeks["theta_call"],
+        greeks["theta_put"],
+        greeks["rho_call"],
+        greeks["rho_put"],
+    )
+
+
+
+
 
 
 def calculate_time_to_expiration(expiration_date_str: str, now: datetime = None) -> float:
@@ -531,6 +632,40 @@ def calculate_option_values(min_spot, max_spot, min_vol, max_vol, strike_price, 
 
     return call_df, put_df, call_pnl_df, put_pnl_df
 
+
+# Same as the one above but using the Black (1976) model for futures options
+def calculate_option_black_values(min_spot, max_spot, min_vol, max_vol, strike_price, risk_free_rate, time_to_maturity, dividend_yield, purchase_price):
+    spot_interval = np.round(np.linspace(min_spot, max_spot, 11), 2)
+    vol_interval = np.round(np.linspace(min_vol, max_vol, 11), 2)
+
+    call_values = np.zeros((len(vol_interval), len(spot_interval)))
+    put_values = np.zeros((len(vol_interval), len(spot_interval)))
+
+    call_pnl = np.zeros((len(vol_interval), len(spot_interval)))
+    put_pnl = np.zeros((len(vol_interval), len(spot_interval)))
+
+    for i, spot in enumerate(spot_interval):
+        for j, vol in enumerate(vol_interval):
+            call_values[j, i] = call_black_value(spot, strike_price, risk_free_rate, time_to_maturity, vol, dividend_yield)
+            put_values[j, i] = put_black_value(spot, strike_price, risk_free_rate, time_to_maturity, vol, dividend_yield)
+
+            call_pnl[j, i] = call_values[j, i] - purchase_price
+            put_pnl[j, i] = put_values[j, i] - purchase_price
+
+    call_df = pd.DataFrame(call_values, index=vol_interval, columns=spot_interval)
+    put_df = pd.DataFrame(put_values, index=vol_interval, columns=spot_interval)
+
+    call_pnl_df = pd.DataFrame(call_pnl, index=vol_interval, columns=spot_interval)
+    put_pnl_df = pd.DataFrame(put_pnl, index=vol_interval, columns=spot_interval)
+
+    call_df = call_df.round(2)
+    put_df = put_df.round(2)
+
+    call_pnl_df = call_pnl_df.round(2)
+    put_pnl_df = put_pnl_df.round(2)
+
+    return call_df, put_df, call_pnl_df, put_pnl_df
+
 def calculate_market_prices(min_spot, max_spot, call_datapoints, put_datapoints, risk_free_rate, dividend_yield):
     spot_interval = np.round(np.linspace(min_spot, max_spot, 11), 2)
 
@@ -555,6 +690,30 @@ def calculate_market_prices(min_spot, max_spot, call_datapoints, put_datapoints,
 
     return call_df, put_df
 
+# Same method as above but using the Black (1976) model for futures options
+def calculate_market_black_prices(min_spot, max_spot, call_datapoints, put_datapoints, risk_free_rate, dividend_yield):
+    spot_interval = np.round(np.linspace(min_spot, max_spot, 11), 2)
+
+    call_vol_interval = call_datapoints["impliedVolatility"].round(2)
+    put_vol_interval = put_datapoints["impliedVolatility"].round(2)
+
+    call_values = np.zeros((len(call_vol_interval), len(spot_interval)))
+    put_values = np.zeros((len(put_vol_interval), len(spot_interval)))
+
+    for i, spot in enumerate(spot_interval):
+        for row in call_datapoints.itertuples():
+            call_values[row.Index, i] = call_bs_value(S=spot, X=row.strike, r=risk_free_rate, T=row.time_to_expiration,
+                                                      v=row.impliedVolatility, q=dividend_yield) - row.lastPrice
+
+    for i, spot in enumerate(spot_interval):
+        for row in put_datapoints.itertuples():
+            put_values[row.Index, i] = put_bs_value(S=spot, X=row.strike, r=risk_free_rate, T=row.time_to_expiration,
+                                                    v=row.impliedVolatility, q=dividend_yield) - row.lastPrice
+
+    call_df = pd.DataFrame(call_values, index=call_vol_interval, columns=spot_interval)
+    put_df = pd.DataFrame(put_values, index=put_vol_interval, columns=spot_interval)
+
+    return call_df, put_df
 
 
 def implied_volatility(market_price, S, K, T, r, option="call", tol=1e-9, max_iter=100):
@@ -833,3 +992,315 @@ def black76_implied_vol_from_spot(market_price, S, K, T, r, option="call", divid
     F = S * np.exp((r - dividend_yield) * T)
     df = np.exp(-r * T)
     return black76_implied_vol(market_price, F, K, T, df=df, option=option, tol=tol, max_iter=max_iter)
+
+####################################################################################
+# Binomial Tree
+####################################################################################
+
+def crr_option_stock(S, K, T, r, sigma, N):
+    dt = T / N
+
+    # CRR parameters
+    u = np.exp(sigma * np.sqrt(dt))
+    d = 1 / u
+    p = (np.exp(r * dt) - d) / (u - d)
+    discount = np.exp(-r * dt)
+
+    # stock price tree
+    stock = np.zeros((N + 1, N + 1))
+
+    for j in range(N + 1):
+        for i in range(j + 1):
+            stock[i,j] = S * (u ** (j - i)) * (d ** i)
+
+    return stock
+
+
+def crr_option_price(S, K, T, r, sigma, N):
+    dt = T / N
+
+    # CRR parameters
+    u = np.exp(sigma * np.sqrt(dt))
+    d = 1 / u
+    p = (np.exp(r * dt) - d) / (u - d)
+    discount = np.exp(-r * dt)
+
+    # stock price tree
+    stock = np.zeros((N + 1, N + 1))
+    for j in range(N + 1):
+        for i in range(j + 1):
+            stock[i, j] = S * (u ** (j - i)) * (d ** i)
+
+    # Option value trees for call and put
+    call_tree = np.zeros((N + 1, N + 1))
+    put_tree = np.zeros((N + 1, N + 1))
+
+    # terminal payoff
+    call_tree[:, N] = np.maximum(stock[:, N] - K, 0)
+    put_tree[:, N] = np.maximum(K - stock[:, N], 0)
+
+    # backward induction
+    for j in range(N - 1, -1, -1):
+        for i in range(j + 1):
+            call_tree[i, j] = discount * (p * call_tree[i, j + 1] + (1 - p) * call_tree[i + 1, j + 1])
+            put_tree[i, j] = discount * (p * put_tree[i, j + 1] + (1 - p) * put_tree[i + 1, j + 1])
+
+    call_price = call_tree[0, 0]
+    put_price = put_tree[0, 0]
+    return call_price, put_price, stock, call_tree, put_tree
+
+
+def jr_option_price(S, K, T, r, sigma, N):
+    dt = T / N
+
+    u = np.exp((r - 0.5*sigma**2)*dt + sigma*np.sqrt(dt))
+    d = np.exp((r - 0.5*sigma**2)*dt - sigma*np.sqrt(dt))
+
+    p = 0.5
+
+    discount = np.exp(-r*dt)
+
+    stock_tree = np.zeros((N + 1, N + 1))
+
+    for i in range(N+1):
+        for j in range(i + 1):
+            stock_tree[j, i] = S * (u**j) * (d**(i-j))
+
+    # Option value trees for call and put
+    call_tree = np.zeros((N + 1, N + 1))
+    put_tree = np.zeros((N + 1, N + 1))
+
+
+    # Terminal Payoff
+    for j in range(N + 1):
+        call_tree[j, N] = max(stock_tree[j, N] - K, 0)
+        put_tree[j, N] = max(K-stock_tree[j, N], 0)
+
+    # Backward Induction
+    for i in range(N - 1, -1, -1):
+        for j in range(i + 1):
+            call_tree[j, i] + discount * (p * call_tree[j + 1, i + 1] + (1 - p) * call_tree[j, i + 1])
+            put_tree[j, i] + discount * (p * put_tree[j + 1, i + 1] + (1 - p) * put_tree[j, i + 1])
+
+    call_price = call_tree[0, 0]
+    put_price = put_tree[0, 0]
+
+    return call_price, put_price, stock_tree, call_tree, put_tree
+
+def h_inverse(z, n):
+    """
+    Peizer-Pratt inversion used in Leisen Reimer (1996).
+
+    Parameters
+    ----------
+    z : float
+        Usually d1 or d2
+    n : int
+        Nomber of time steps (proferably odd).
+
+    Returns
+    -------
+    float
+        Probability approximation
+    """
+    if n % 2 == 0:
+        n += 1
+
+    a = n + 1/3
+    b = 1/(n + 1/6)
+
+    exponent = -(z/a)**2 * (n + 1/6)
+
+    return 0.5 + np.sign(z) * np.sqrt(0.25 * (1 - np.exp(exponent)))
+
+
+def lr_option_price(S, K, T, r, sigma, N):
+    if N % 2 == 0:
+        N += 1    
+
+    dt = T / N
+
+    d1 = (np.log(S / K) + (r + 0.5 * sigma**2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
+
+    p = h_inverse(d2, N)
+    p_prime = h_inverse(d1, N)
+
+    growth = np.exp(r * dt)
+
+    u = growth * p_prime / p
+    d = (growth - p * u) / (1 - p)
+
+    # build full stock price tree (same shape as other models)
+    stock = np.zeros((N + 1, N + 1))
+    for j in range(N + 1):
+        for i in range(j + 1):
+            stock[i, j] = S * (u ** (j - i)) * (d ** i)
+
+    # Option value trees for call and put
+    call_tree = np.zeros((N + 1, N + 1))
+    put_tree = np.zeros((N + 1, N + 1))
+
+    # Terminal payoff
+    call_tree[:, N] = np.maximum(stock[:, N] - K, 0.0)
+    put_tree[:, N] = np.maximum(K - stock[:, N], 0.0)
+
+    disc = np.exp(-r * dt)
+
+    # Backward induction
+    for j in range(N - 1, -1, -1):
+        for i in range(j + 1):
+            call_tree[i, j] = disc * (p * call_tree[i, j + 1] + (1 - p) * call_tree[i + 1, j + 1])
+            put_tree[i, j] = disc * (p * put_tree[i, j + 1] + (1 - p) * put_tree[i + 1, j + 1])
+
+    call_price = call_tree[0, 0]
+    put_price = put_tree[0, 0]
+
+    return call_price, put_price, stock, call_tree, put_tree
+
+
+## ! REVIEW
+def _solve_tridiagonal(lower, diag, upper, rhs):
+    lower = lower.astype(float).copy()
+    diag = diag.astype(float).copy()
+    upper = upper.astype(float).copy()
+    rhs = rhs.astype(float).copy()
+    n = len(diag)
+    for i in range(1, n):
+        w = lower[i - 1] / diag[i - 1]
+        diag[i] -= w * upper[i - 1]
+        rhs[i] -= w * rhs[i - 1]
+
+    x = np.empty(n, dtype=float)
+    x[-1] = rhs[-1] / diag[-1]
+    for i in range(n - 2, -1, -1):
+        x[i] = (rhs[i] - upper[i] * x[i + 1]) / diag[i]
+
+    return x
+
+##! REVIEW
+def _black_scholes_pde_log_grid(S, K, T, r, sigma, N, x_grid, option="call"):
+    if T <= 0:
+        return max(S - K, 0.0) if option == "call" else max(K - S, 0.0)
+
+    M = len(x_grid) - 1
+    S_grid = np.exp(x_grid)
+    dt = T / N
+
+    V = np.zeros((M + 1, N + 1), dtype=float)
+    t_grid = np.arange(N + 1) * dt
+
+    if option == "call":
+        V[:, -1] = np.maximum(S_grid - K, 0.0)
+        V[0, :] = 0.0
+        V[-1, :] = S_grid[-1] - K * np.exp(-r * (T - t_grid))
+    else:
+        V[:, -1] = np.maximum(K - S_grid, 0.0)
+        V[0, :] = K * np.exp(-r * (T - t_grid))
+        V[-1, :] = 0.0
+
+    mu = r - 0.5 * sigma**2
+    sigma2 = 0.5 * sigma**2
+
+    lower = np.zeros(M - 1, dtype=float)
+    diag = np.zeros(M - 1, dtype=float)
+    upper = np.zeros(M - 1, dtype=float)
+
+    for i in range(1, M):
+        dx_plus = x_grid[i + 1] - x_grid[i]
+        dx_minus = x_grid[i] - x_grid[i - 1]
+        dx_sum = dx_plus + dx_minus
+
+        a = mu / dx_sum + sigma2 / (dx_minus * dx_sum)
+        c = -mu / dx_sum + sigma2 / (dx_plus * dx_sum)
+        b = -r + sigma2 * (1.0 / dx_plus + 1.0 / dx_minus) / dx_sum
+
+        lower[i - 1] = -0.5 * dt * a
+        diag[i - 1] = 1.0 - 0.5 * dt * b
+        upper[i - 1] = -0.5 * dt * c
+
+    for j in range(N - 1, -1, -1):
+        rhs = np.zeros(M - 1, dtype=float)
+        for i in range(1, M):
+            dx_plus = x_grid[i + 1] - x_grid[i]
+            dx_minus = x_grid[i] - x_grid[i - 1]
+            dx_sum = dx_plus + dx_minus
+
+            a = mu / dx_sum + sigma2 / (dx_minus * dx_sum)
+            c = -mu / dx_sum + sigma2 / (dx_plus * dx_sum)
+            b = -r + sigma2 * (1.0 / dx_plus + 1.0 / dx_minus) / dx_sum
+
+            idx = i - 1
+            rhs[idx] = (
+                (1.0 + 0.5 * dt * b) * V[i, j + 1]
+                + 0.5 * dt * a * V[i - 1, j + 1]
+                + 0.5 * dt * c * V[i + 1, j + 1]
+            )
+
+        rhs[0] -= lower[0] * V[0, j]
+        rhs[-1] -= upper[-1] * V[-1, j]
+
+        V[1:-1, j] = _solve_tridiagonal(lower, diag, upper, rhs)
+
+    v0 = np.interp(np.log(S), x_grid, V[:, 0])
+    return float(v0)
+
+## ! REVIEW
+def figlewski_option_price(S, K, T, r, sigma, N, option="call"):
+    M = max(200, N * 5)
+    x_mid = np.log(K)
+    x_std = max(4.0 * sigma * np.sqrt(T), 1.0)
+    x_min = x_mid - x_std * 2.5
+    x_max = x_mid + x_std * 2.5
+
+    xi = np.linspace(-1.0, 1.0, M + 1)
+    alpha = 4.0
+    x_grid = x_mid + 0.5 * (x_max - x_min) * np.tanh(alpha * xi) / np.tanh(alpha)
+
+    price = _black_scholes_pde_log_grid(S, K, T, r, sigma, N, x_grid, option=option)
+    return price
+
+## ! REVIEW
+def hull_white_option_price(S, K, T, r, sigma, N, option="call"):
+    M = max(200, N * 5)
+    x_mid = np.log(K)
+    width = max(8.0 * sigma * np.sqrt(T), abs(np.log(S / K)) * 2.0 + 1.0)
+    x_grid = np.linspace(x_mid - width, x_mid + width, M + 1)
+
+    price = _black_scholes_pde_log_grid(S, K, T, r, sigma, N, x_grid, option=option)
+    return price
+
+# ! REVIEW
+def tian_option_price(S, K, T, r, sigma, N):
+    dt = T / N
+
+    R = np.exp(r * dt)
+    V = np.exp(sigma**2 * dt)
+
+    u = (R * V / 2) * (V + 1 + np.sqrt(V**2 + 2 * V - 3))
+    d = (R * V / 2) * (V + 1 - np.sqrt(V**2 + 2 * V - 3))
+
+    p = (R - d) / (u - d)
+
+    disc = np.exp(-r * dt)
+
+    stock = np.zeros((N + 1, N + 1))
+    for j in range(N + 1):
+        for i in range(j + 1):
+            stock[i, j] = S * (u**i) * (d**(j - i))
+
+    call_tree = np.zeros((N + 1, N + 1))
+    put_tree = np.zeros((N + 1, N + 1))
+
+    call_tree[:, N] = np.maximum(stock[:, N] - K, 0.0)
+    put_tree[:, N] = np.maximum(K - stock[:, N], 0.0)
+
+    for j in range(N - 1, -1, -1):
+        for i in range(j + 1):
+            call_tree[i, j] = disc * (p * call_tree[i, j + 1] + (1 - p) * call_tree[i + 1, j + 1])
+            put_tree[i, j] = disc * (p * put_tree[i, j + 1] + (1 - p) * put_tree[i + 1, j + 1])
+
+    call_price = call_tree[0, 0]
+    put_price = put_tree[0, 0]
+
+    return call_price, put_price, stock, call_tree, put_tree
