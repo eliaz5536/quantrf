@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 from scipy.stats import norm
 from scipy.optimize import brentq
+from scipy.stats import ncx2
 
 import scipy as sq
 import seaborn as sns
@@ -1304,3 +1305,95 @@ def tian_option_price(S, K, T, r, sigma, N):
     put_price = put_tree[0, 0]
 
     return call_price, put_price, stock, call_tree, put_tree
+
+####################################################################################
+# Interest Rate Models
+####################################################################################
+
+# Cox-Ingersoll-Ross (1985)
+def CIR(r0, kappa, theta, sigma, T, steps):
+    dt = T / steps
+
+    r = np.zeros(steps+1)
+    r[0] = 0
+
+    d= 4 * kappa * theta / sigma ** 2
+
+    for i in range(steps):
+        c = (sigma ** 2 * (1 - np.exp(-kappa * dt))) / (4*kappa)
+
+        lam=(
+            4 * kappa * np.exp(-kappa * dt) *r[i]
+            / (sigma ** 2 * (1 - np.exp(-kappa * dt)))
+        )
+
+        r[i+1] = c * ncx2.rvs(d,lam)
+
+    return r
+
+
+def CIR_bond_price(r, kappa, theta, sigma, tau):
+    gamma = np.sqrt(kappa ** 2 + 2 * sigma ** 2)
+    numerator = 2 * (np.exp(gamma.tau) - 1)
+    denominator = (gamma + kappa) * (np.exp(gamma * tau) - 1) + 2 * gamma
+
+    B = numerator / denominator
+
+    A = ((2 ** gamma * np.exp((kappa + gamma) * tau / 2) / denominator)) ** (2 * kappa * theta / sigma ** 2)
+
+    return A * np.exp(-B * r)
+
+# def CIR_show_bond_prices(r0, kappa, theta, sigma, tau):
+def CIR_show_bond_prices(maturity, r0, kappa, theta, sigma, tau):
+    maturity = np.linspace(.25, 30, 120)
+
+    prices = []
+
+    for tau in maturity:
+        prices.append(CIR_bond_price(r0, kappa, theta, sigma, tau))
+        prices = np.array(prices)
+
+    return prices
+
+
+def CIR_yield_curve(prices, maturity):
+    return -np.log(prices) / maturity
+
+# Vasicek
+def vasicek_option_price(S, K, T, r, sigma, N):
+
+    return call_price, put_price, stock, call_tree, put_tree
+
+
+####################################################################################
+# American Option Pricing
+####################################################################################
+
+# Bjerksund-Stensland (1993)
+def bs1993_option_price(S, K, T, r, sigma, N):
+
+    return call_price, put_price, stock, call_tree, put_tree
+
+# Bjerksund-Stensland (2002)
+def bs2002_option_price(S, K, T, r, sigma, N):
+
+    return call_price, put_price, stock, call_tree, put_tree
+
+# Brenner and Galai (1989)
+def bg_option_price(S, K, T, r, sigma, N):
+
+    return call_price, put_price, stock, call_tree, put_tree
+
+# GARCH
+def garch_option_price(S, K, T, r, sigma, N):
+
+    return call_price, put_price, stock, call_tree, put_tree
+
+# Ju-Zhong (1999)
+def ju_zhong_option_price(S, K, T, r, sigma, N):
+
+    return call_price, put_price, stock, call_tree, put_tree
+
+####################################################################################
+# Volatility
+####################################################################################
