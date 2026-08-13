@@ -1369,30 +1369,188 @@ def vasicek_option_price(S, K, T, r, sigma, N):
 # American Option Pricing
 ####################################################################################
 
+# ! Review
 # Bjerksund-Stensland (1993)
-def bs1993_option_price(S, K, T, r, sigma, N):
+def bs1993_phi(S, K, T, gamma, H, x, r, b, sigma):
+    # Equation 8
+	Lambda = -r + gamma * b + 0.5 * gamma * (gamma - 1) * sigma ** 2
 
-    return call_price, put_price, stock, call_tree, put_tree
+	# Equation 9
+	kappa = (2 * b / (sigma ** 2)) + (2 * gamma - 1);
+
+	# Equation 7 for the phi function
+	d1 = -(((np.log(S/H) + (b+(gamma-0.5)*sigma*sigma)*T)) / (sigma * np.sqrt(T)));
+	d2 = -((np.log(x**2/S/H) + (b+(gamma-0.5)*sigma*sigma)*T) / (sigma * np.sqrt(T)));
+
+	# Return phi
+	return np.exp(Lambda * T) * np.pow(S,gamma) * (np.cdf(d1) - np.pow(x / S, kappa) * np.cdf(d2));
+
+# ! Review
+# def bs1993_option_price(S, K, T, r, sigma, N):
+def bs1993_option_price(S, K, T, r, b, sigma):
+    if b >= r:
+        print("Black Scholes") # Call Black-Scholes equation here and pass as 'call'
+        return 0
+
+    # Call price
+    beta = ((0.5 - b/(2**sigma)) + (np.sqrt(b/2**sigma - 0.5)**2 + 2*r/sigma**2))
+
+    hT = -(b*T + 2*sigma*np.sqrt(T)) * (2**K/((bInf - b0)*b0))
+    bInf = (beta/beta-1)*K
+    b0 = np.max(K,(r/r-b)*K)
+
+    XT = b0 + (bInf - b0)  * (1 - np.exp(hT))
+
+    if(S >= XT):
+        call_price = S - K
+    else:
+        aX = (XT - K)*np.pow(XT, -b)
+        t = 0.5 * (np.sqrt(5) - 1) * T
+        hTt = -(b*(T-t) + 2* sigma * np.sqrt(T-t)) * K * K/b0/(bInf-b0)
+
+        x = b0 + (bInf - b0) * (1 - np.exp(hTt))
+
+        call_price = (aX * np.pow(S, b)) - aX * bs1993_phi(S, t, beta, XT, XT, r, b, sigma) + bs1993_phi(S, t, 1, XT, XT, r, b, sigma) - bs1993_phi(S, t, 1, x, XT, r, b, sigma) - K * bs1993_phi(S, t, 0, XT, XT, r, b, sigma) + K * bs1993_phi(S, t, 0, x, XT, r, b, sigma) + aX * bs1993_phi(S, t, beta, x, XT, r, b, sigma) - aX * bs1993_phi(S, T, beta, x, XT, x, t, r, b, sigma) + bs1993_phi(S, T, 1, x, XT, x, t, r, b, sigma) - bs1993_phi(S, T, 1, K, XT, x, t, r, b, sigma) - K * bs1993_phi(S, T, 0, x, XT, x, t, r, b, sigma) + K * bs1993_phi(S, T, 0, K, XT, x, t, r, b, sigma)
+
+    # return call_price, put_price, stock, call_tree, put_tree
+    # return call_price, put_price
+    return call_price
+
+
+# ! Review
+def bs2002_phi(S, K, T, gamma, H, x, r, b, sigma):
+    # Equation 8
+	Lambda = -r + gamma * b + 0.5 * gamma * (gamma - 1) * sigma ** 2
+
+	# Equation 9
+	kappa = (2 * b / (sigma ** 2)) + (2 * gamma - 1);
+
+	# Equation 7 for the phi function
+	d1 = -(((np.log(S/H) + (b+(gamma-0.5)*sigma*sigma)*T)) / (sigma * np.sqrt(T)));
+	d2 = -((np.log(x**2/S/H) + (b+(gamma-0.5)*sigma*sigma)*T) / (sigma * np.sqrt(T)));
+
+	# Return phi
+	return np.exp(Lambda * T) * np.pow(S,gamma) * (np.cdf(d1) - np.pow(x / S, kappa) * np.cdf(d2));
+
+# ! Review
+def bs2002_psi(S, T, gamma, H, X, x, t, r, b, sigma):
+    d1 = -(np.log(S / x) + (b + (gamma - 0.5) * sigma ** 2) * t) / (sigma * np.sqrt(t))
+	d2 = -(np.log(X ** 2 / S / x) + (b + (gamma - 0.5) * sigma ** 2) * t) / (sigma * np.sqrt(t))
+	d3 = -(np.log(S / x) - (b + (gamma - 0.5) * sigma ** 2) * t) / (sigma * np.sqrt(t))
+	d4 = -(np.log(X**2 / S / x) - (b + (gamma - 0.5) * sigma ** 2) * t) / (sigma * np.sqrt(t))
+
+	D1 = -(np.log(S / H) + (b + (gamma - 0.5) * sigma**2) * T) / (sigma * np.sqrt(T))
+	D2 = -(np.log(X**2 / S / H) + ( b + (gamma - 0.5) * sigma ** 2) * T) / (sigma * np.sqrt(T))
+	D3 = -(np.log(x**2 / S / H) + (b + (gamma - 0.5) * sigma ** 2) * T) / (sigma * np.sqrt(T))
+	D4 = -(np.log(S*x**2 / H / X / X) + (b + (gamma - 0.5) * sigma ** 2) * T) / (sigma * np.sqrt(T))
+
+	rho = np.sqrt(t / T)
+
+	Lambda = -r + gamma * b + 0.5 * gamma * (gamma - 1) * sigma ** 2
+	kappa = 2 * b / sigma / sigma + (2 * gamma - 1)
+
+	return np.exp(Lambda * T) * np.pow(S, gamma) * (
+		np.cdf(d1, D1, rho) -
+		np.cdf(d2, D2, rho) * np.pow(X / S, kappa) -
+		np.cdf(d3, D3, -rho) * np.pow(x / S, kappa) +
+		np.cdf(d4, D4, -rho) * np.pow(x / X, kappa))
 
 # Bjerksund-Stensland (2002)
-def bs2002_option_price(S, K, T, r, sigma, N):
+def bs2002_option_price(S, K, T, r, b, sigma):
+    if b >= r:
+        print("Black Scholes") # Call Black-Scholes equation here and pass as 'call'
+        return 0
 
-    return call_price, put_price, stock, call_tree, put_tree
+    # Call price
+    beta = ((0.5 - b/(2**sigma)) + (np.sqrt(b/2**sigma - 0.5)**2 + 2*r/sigma**2))
+
+    hT = -(b*T + 2*sigma*np.sqrt(T)) * (2**K/((bInf - b0)*b0))
+    bInf = (beta/beta-1)*K
+    b0 = np.max(K,(r/r-b)*K)
+
+    XT = b0 + (bInf - b0)  * (1 - np.exp(hT))
+
+    if(S >= XT):
+        call_price = S - K
+    else:
+        aX = (XT - K)*np.pow(XT, -b)
+        t = 0.5 * (np.sqrt(5) - 1) * T
+        hTt = -(b*(T-t) + 2* sigma * np.sqrt(T-t)) * K * K/b0/(bInf-b0)
+
+        x = b0 + (bInf - b0) * (1 - np.exp(hTt))
+
+        call_price = (aX * np.pow(S, b)) 
+        - aX * bs1993_phi(S, t, beta, XT, XT, r, b, sigma) 
+        + bs1993_phi(S, t, 1, XT, XT, r, b, sigma) 
+        - bs1993_phi(S, t, 1, x, XT, r, b, sigma) 
+        - K * bs1993_phi(S, t, 0, XT, XT, r, b, sigma) 
+        + K * bs1993_phi(S, t, 0, x, XT, r, b, sigma) 
+        + aX * bs1993_phi(S, t, beta, x, XT, r, b, sigma) 
+        - aX * bs1993_phi(S, T, beta, x, XT, x, t, r, b, sigma) 
+        + bs1993_phi(S, T, 1, x, XT, x, t, r, b, sigma) 
+        - bs1993_phi(S, T, 1, K, XT, x, t, r, b, sigma) 
+        - K * bs1993_phi(S, T, 0, x, XT, x, t, r, b, sigma) 
+        + K * bs1993_phi(S, T, 0, K, XT, x, t, r, b, sigma)
+
+    return call_price
 
 # Brenner and Galai (1989)
 def bg_option_price(S, K, T, r, sigma, N):
+
+
 
     return call_price, put_price, stock, call_tree, put_tree
 
 # GARCH
 def garch_option_price(S, K, T, r, sigma, N):
 
+
+
     return call_price, put_price, stock, call_tree, put_tree
+
+
+
+
 
 # Ju-Zhong (1999)
-def ju_zhong_option_price(S, K, T, r, sigma, N):
+def ju_zhong_option_price(S, K, r, q, v, T, phi, MaxIter, tol, dS):
+	Sx = Newton(S, K, r, q, v, T, phi, dS, MaxIter, tol)
 
-    return call_price, put_price, stock, call_tree, put_tree
+	Ve = BSPrice(Sx, K, r, q, v, T, phi)
+
+    h = (1 - np.exp(-r * T))
+	alpha = 2 * r / v / v
+	beta = 2 * (r - q) / v / v
+	hAh = phi * (Sx - K) - Ve
+	d1 = (np.log(Sx / K) + (r - q + v * v / 2) * T) / v / np.sqrt(T)
+	d2 = d1 - v * np.sqrt(T)
+
+	Lambda, b, c, lambdap, dVdh = [],[],[],[],[]
+
+	if r == 0.0 && phi == 1:
+		Lambda = ((1 - beta) + np.sqrt((beta - 1)*(beta - 1) + 8 / v / v / T)) / 2
+		b = -2 / (v * v * v * v) / (T * T) / ((beta - 1) * (beta - 1) + 8 / v / v / T)
+		c = -1 / np.sqrt((beta - 1) * (beta - 1) + 8 / v / v / T) * (Sx * np.pdf(d1) * np.exp(-q * T) / hAh / v / np.sqrt(T)
+			- 2 * q * Sx * np.cdf(d1) * np.exp(-q * T)
+			+ 2 / v / v / T - 4 / (v * v * v * v) / (T * T) / ((beta - 1) * (beta - 1) + 8 / v / v / T))
+
+	else:
+		Lambda  = ((1 - beta) + phi * np.sqrt((beta - 1) * (beta - 1) + 4 * alpha / h)) / 2
+		lambdap = -phi * alpha / (h * h) / np.sqrt((beta - 1) * (beta - 1) + 4 * alpha / h)
+		dVdh = Sx * np.pdf(d1) * v * np.exp((r - q) * T) / 2 / r / np.sqrt(T)
+				- phi * q * Sx * np.cdf(phi * d1) * np.exp((r - q) * T) / r
+				+ phi * K * np.cdf(phi * d2)
+		b = (1 - h) * alpha * lambdap / 2 / (2 * Lambda + beta - 1)
+		c = -(1 - h) * alpha / (2 * Lambda + beta - 1) * (1 / hAh * dVdh + 1 / h + lambdap / (2 * Lambda + beta - 1))
+
+	X = b * (np.log(S / Sx)) * (np.log(S / Sx)) + c * np.log(S / Sx)
+
+	VE = BS.BSPrice(S,K,r,q,v,T,phi)
+
+	if phi * (Sx - S) > 0.0:
+		return VE + hAh* np.pow(S / Sx, Lambda) / (1 - X)
+	else:
+		return phi * (S - K)
 
 ####################################################################################
 # Volatility
