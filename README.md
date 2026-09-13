@@ -16,7 +16,7 @@ The project extends and uses [**Georgios Drosogiannis**](https://github.com/Geor
 # Features
 
 ### Interactive Option Pricing
-- Real-time option valuatoin using the Black-Scholes model
+- Real-time option valuation using the Black-Scholes model
 - Dynamic parameter adjustment through an interactive Streamlit interface
 - Support for both European Call and Put options
 - Instant recalculation of theoretical option prices.
