@@ -40,20 +40,22 @@ st.set_page_config(page_title="Black (1976)", layout="wide")
 st.sidebar.title("Quant Research Framework")
 st.sidebar.page_link(page="", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
-st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=False)
-st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree", disabled=False)
-st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree", disabled=False)
+st.sidebar.page_link(page="pages/black.py", label="Black (1976)")
+st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree")
+st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree")
+st.sidebar.page_link(page="pages/interest_rate_models.py", label="Interest Rate Models")
+st.sidebar.page_link(page="pages/american_option_pricing.py", label="American Option Pricing")
+
 st.sidebar.markdown(
     """
     <div style='margin-bottom: 25px;'>
-        <!-- <span style='font-weight: bold; font-size: 18px;'>Created by:</span><br> -->
         <a href='https://www.linkedin.com/in/eliaz-simon/' target='_blank' style='text-decoration: none; display: flex; align-items: center; gap: 12px; margin-top: 8px;'>
             <img src='https://cdn-icons-png.flaticon.com/512/174/174857.png' width='32' height='32'/>
             <span style='color: #0A66C2; font-size: 18px; font-weight: bold;'>Eliaz Simon</span>
         </a>
     </div>
     """,
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
 program_mode = st.sidebar.radio(
