@@ -13,7 +13,7 @@ from scipy.interpolate import griddata
 st.set_page_config(page_title="Black-Scholes-Merton (1973)", layout="wide")
 st.sidebar.title("Quant Research Framework")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
-st.sidebar.page_link(page="pages/black.py", label="Black (1976)")
+st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=True)
 st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree")
 st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree")
 st.sidebar.page_link(page="pages/interest_rate_models.py", label="Interest Rate Models")
@@ -372,11 +372,47 @@ elif program_mode == "Historical Ticker Data Pricer":
         """Cache the per-expiry SVI fits (independent of strike/liquidity sliders)."""
         return svi.fit_all_slices(iv_df, spot, r, q)
 
-    # Get the Calls and Puts
-    calls_all, puts_all, spot_price = f.get_option_chains_spot(ticker_symbol=ticker_symbol)
+    # Use the same cached data pipeline as the implied-volatility surface.
+    # The older get_option_chains_spot() path makes a separate Yahoo request
+    # for every expiry and can fail before the surface code is reached.
+    try:
+        _, spot_price = f.get_stock_data(ticker_symbol)
+        options_data, _ = f.get_options_data(ticker_symbol)
+    except ValueError as exc:
+        st.error(str(exc))
+        st.stop()
+    except Exception as exc:
+        st.error(f"Unable to load option data for {ticker_symbol}: {exc}")
+        st.stop()
+
+    if options_data.empty:
+        st.error(
+            f"No option data returned for {ticker_symbol}. "
+            "Yahoo may be temporarily unavailable or the ticker may have no listed options."
+        )
+        st.stop()
+
+    calls_all = options_data.loc[options_data["optionType"] == "C", [
+        "strike", "lastPrice", "impliedVolatility", "expiration"
+    ]].copy()
+    puts_all = options_data.loc[options_data["optionType"] == "P", [
+        "strike", "lastPrice", "impliedVolatility", "expiration"
+    ]].copy()
 
     calls_all["expiration"] = pd.to_datetime(calls_all["expiration"])
     puts_all["expiration"] = pd.to_datetime(puts_all["expiration"])
+    calls_all["time_to_expiration"] = calls_all["expiration"].map(
+        lambda date: f.calculate_time_to_expiration(date.strftime("%Y-%m-%d"))
+    )
+    puts_all["time_to_expiration"] = puts_all["expiration"].map(
+        lambda date: f.calculate_time_to_expiration(date.strftime("%Y-%m-%d"))
+    )
+    calls_all = calls_all[calls_all["time_to_expiration"] > 0].reset_index(drop=True)
+    puts_all = puts_all[puts_all["time_to_expiration"] > 0].reset_index(drop=True)
+
+    if calls_all.empty or puts_all.empty:
+        st.error(f"No future call and put expiries are available for {ticker_symbol}.")
+        st.stop()
 
     common_years = pd.Series(list(set(calls_all['expiration'].dt.year) & set(puts_all['expiration'].dt.year)))
 
@@ -397,9 +433,13 @@ elif program_mode == "Historical Ticker Data Pricer":
     selected_day = st.sidebar.selectbox('Day', options=common_days) 
 
     # Format the date to use in teh dataframes
-    formatted_date = f"{selected_year}-{int(selected_month):02}-{int(selected_day):02}"
-    date_for_call = calls_all[calls_all['expiration'] == formatted_date]
-    date_for_put = puts_all[puts_all['expiration'] == formatted_date]
+    formatted_date = pd.Timestamp(
+        year=int(selected_year),
+        month=int(selected_month),
+        day=int(selected_day),
+    )
+    date_for_call = calls_all[calls_all["expiration"] == formatted_date]
+    date_for_put = puts_all[puts_all["expiration"] == formatted_date]
 
     # Time to maturity in float
     time_to_maturity = date_for_call["time_to_expiration"].iloc[0]
