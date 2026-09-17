@@ -12,7 +12,7 @@ from scipy.interpolate import griddata
 st.set_page_config(page_title="Black (1976)", layout="wide")
 st.sidebar.title("Quant Research Framework")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
-st.sidebar.page_link(page="pages/black.py", label="Black (1976)")
+st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=True)
 st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree")
 st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree")
 st.sidebar.page_link(page="pages/interest_rate_models.py", label="Interest Rate Models")

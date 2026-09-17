@@ -6,7 +6,7 @@ import black_scholes_app as f
 st.set_page_config(page_title="Interest Rate Models", layout="wide")
 st.sidebar.title("Quant Research Framework")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
-st.sidebar.page_link(page="pages/black.py", label="Black (1976)")
+st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=True)
 st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree")
 st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree")
 st.sidebar.page_link(page="pages/interest_rate_models.py", label="Interest Rate Models")
