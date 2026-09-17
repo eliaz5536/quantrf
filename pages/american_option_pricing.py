@@ -5,7 +5,6 @@ import black_scholes_app as f
 
 st.set_page_config(page_title="American Option Pricing", layout="wide")
 st.sidebar.title("Quant Research Framework")
-st.sidebar.page_link(page="", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
 st.sidebar.page_link(page="pages/black.py", label="Black (1976)")
 st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree")
