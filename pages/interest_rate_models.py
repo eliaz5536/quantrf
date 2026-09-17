@@ -2,26 +2,31 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 import black_scholes_app as f
+import math_documentation as math_doc
 
 st.set_page_config(page_title="Interest Rate Models", layout="wide")
 st.sidebar.title("Quant Research Framework")
+st.sidebar.page_link(page="pages/monte_carlo.py", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
 st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=True)
 st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree")
-st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree")
+st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree", disabled=True)
 st.sidebar.page_link(page="pages/interest_rate_models.py", label="Interest Rate Models")
 st.sidebar.page_link(page="pages/american_option_pricing.py", label="American Option Pricing")
-
+st.sidebar.page_link(page="pages/credit_risk.py", label="Credit Risk")
+st.sidebar.page_link(page="pages/risk_management.py", label="Risk Management")
+st.sidebar.page_link(page="pages/volatility_models.py", label="Volatility Models")
 st.sidebar.markdown(
     """
     <div style='margin-bottom: 25px;'>
+        <!-- <span style='font-weight: bold; font-size: 18px;'>Created by:</span><br> -->
         <a href='https://www.linkedin.com/in/eliaz-simon/' target='_blank' style='text-decoration: none; display: flex; align-items: center; gap: 12px; margin-top: 8px;'>
             <img src='https://cdn-icons-png.flaticon.com/512/174/174857.png' width='32' height='32'/>
             <span style='color: #0A66C2; font-size: 18px; font-weight: bold;'>Eliaz Simon</span>
         </a>
     </div>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
 
 program_mode = st.sidebar.radio("Select Program Mode:", ("Cox-Ingersoll-Ross", "Vasicek"))
@@ -29,6 +34,7 @@ program_mode = st.sidebar.radio("Select Program Mode:", ("Cox-Ingersoll-Ross", "
 st.title("Interest Rate Models")
 if program_mode == "Cox-Ingersoll-Ross":
     st.subheader("Cox-Ingersoll-Ross")
+    math_doc.interest_rates("cir")
     st.sidebar.header("Cox-Ingersoll-Ross Variables")
 
     kappa = st.sidebar.number_input("Mean Reversion Speed κ", value=0.80, format="%.4f")
@@ -49,6 +55,7 @@ if program_mode == "Cox-Ingersoll-Ross":
 
 elif program_mode == "Vasicek":
     st.subheader("Vasicek")
+    math_doc.interest_rates("vasicek")
     st.sidebar.header("Vasicek Variables")
 
     kappa = st.sidebar.number_input("Mean Reversion Speed κ", value=0.80, format="%.4f")

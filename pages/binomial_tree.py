@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import black_scholes_app as f
 import svi
+import math_documentation as math_doc
 
 from scipy.interpolate import griddata
 
@@ -38,24 +39,29 @@ def plot_model_sensitivity_curve(model_name, call_solver, put_solver, S0, K, T, 
 
 st.set_page_config(page_title="Black (1976)", layout="wide")
 st.sidebar.title("Quant Research Framework")
+st.sidebar.page_link(page="pages/monte_carlo.py", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
-st.sidebar.page_link(page="pages/black.py", label="Black (1976)")
+st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=True)
 st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree")
-st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree")
+st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree", disabled=True)
 st.sidebar.page_link(page="pages/interest_rate_models.py", label="Interest Rate Models")
 st.sidebar.page_link(page="pages/american_option_pricing.py", label="American Option Pricing")
-
+st.sidebar.page_link(page="pages/credit_risk.py", label="Credit Risk")
+st.sidebar.page_link(page="pages/risk_management.py", label="Risk Management")
+st.sidebar.page_link(page="pages/volatility_models.py", label="Volatility Models")
 st.sidebar.markdown(
     """
     <div style='margin-bottom: 25px;'>
+        <!-- <span style='font-weight: bold; font-size: 18px;'>Created by:</span><br> -->
         <a href='https://www.linkedin.com/in/eliaz-simon/' target='_blank' style='text-decoration: none; display: flex; align-items: center; gap: 12px; margin-top: 8px;'>
             <img src='https://cdn-icons-png.flaticon.com/512/174/174857.png' width='32' height='32'/>
             <span style='color: #0A66C2; font-size: 18px; font-weight: bold;'>Eliaz Simon</span>
         </a>
     </div>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
+
 
 program_mode = st.sidebar.radio(
     'Select Model:',
@@ -64,6 +70,7 @@ program_mode = st.sidebar.radio(
 
 if program_mode == 'Cox-Ross-Rubinstein':
     st.title("Cox-Ross-Rubinstein (1979) Binomial Tree Model")
+    math_doc.binomial("crr")
 
     # Input parameters
     S0 = st.sidebar.number_input('Initial Stock Price (S0)', min_value=0.0, value=100.0)
@@ -137,6 +144,7 @@ if program_mode == 'Cox-Ross-Rubinstein':
 
 elif program_mode == 'Jarrow-Rudd':
     st.title("Jarrow-Rudd (1979) Binomial Tree Model")
+    math_doc.binomial("jr")
 
     # Input parameters
     S0 = st.sidebar.number_input('Initial Stock Price (S0)', min_value=0.0, value=100.0)
@@ -210,6 +218,7 @@ elif program_mode == 'Jarrow-Rudd':
 
 elif program_mode == 'Leisen-Reimer':
     st.title("Leisen-Reimer (1979) Binomial Tree Model")
+    math_doc.binomial("lr")
 
     # Input parameters
     S0 = st.sidebar.number_input('Initial Stock Price (S0)', min_value=0.0, value=100.0)
@@ -283,6 +292,7 @@ elif program_mode == 'Leisen-Reimer':
 
 elif program_mode == "Tian":
     st.title("Tian (1993) Binomial Tree Model")
+    math_doc.binomial("tian")
 
     # Input parameters
     S0 = st.sidebar.number_input('Initial Stock Price (S0)', min_value=0.0, value=100.0)
@@ -356,6 +366,7 @@ elif program_mode == "Tian":
 
 elif program_mode == 'Figlewski':
     st.title('Figlewski & Gao (1999) Adaptive Mesh Model')
+    math_doc.finite_difference('Figlewski & Gao')
 
     S0 = st.sidebar.number_input('Initial Stock Price (S0)', min_value=0.0, value=100.0)
     K = st.sidebar.number_input('Strike Price (K)', min_value=0.0, value=100.0)
@@ -386,6 +397,7 @@ elif program_mode == 'Figlewski':
 
 elif program_mode == 'Hull-White':
     st.title('Hull-White (2004) Finite Difference Model')
+    math_doc.finite_difference('Hull-White')
 
     S0 = st.sidebar.number_input('Initial Stock Price (S0)', min_value=0.0, value=100.0)
     K = st.sidebar.number_input('Strike Price (K)', min_value=0.0, value=100.0)

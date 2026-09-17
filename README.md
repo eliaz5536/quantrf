@@ -131,14 +131,14 @@ Support for early exercise methods, including:
 - Bjerksund-Stensland (2002)
 
 ### Credit Risk Modelling
-Future credit risk analytics may include:
+Implemented credit risk analytics include:
 - KMV-Merton Structural Credit Risk Model
 - Probability of Default (PD)
 - Credit Spread Analysis
 - Structural and Reduced-Form Credit Risk Models
 
 ### Volatility & Risk Analytics
-Future volatility and risk management capabilities may include:
+Implemented volatility and risk analytics include:
 - Variance-Covariance Matrix
 - Historical Volatility
 - Implied Volatility Surface Construction
@@ -147,6 +147,7 @@ Future volatility and risk management capabilities may include:
 - Principal Component Analysis (PCA)
 - Valute at Risk (VaR)
 - Conditional Value at Risk (CVaR)
+- GARCH(1,1) volatility estimation and forecasting
 
 ## Credits
 The following projects provided valuable inspiration and reference implementaitons during the development of this frameowrk:

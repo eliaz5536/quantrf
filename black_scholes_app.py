@@ -6,6 +6,16 @@ import pandas as pd
 from scipy.stats import norm
 from scipy.optimize import brentq
 from scipy.stats import ncx2
+from american_models import ju_zhong_option_price, brenner_galai_option_price
+from credit_models import (
+    merton_equity_value,
+    merton_debt_value,
+    distance_to_default,
+    probability_of_default,
+    solve_asset_value,
+)
+from risk_models import historical_var, historical_cvar, parametric_var, parametric_cvar
+from volatility_models import fit_garch11, forecast_garch11
 
 import scipy as sq
 import seaborn as sns
@@ -628,8 +638,7 @@ def bs1993_option_price(S, K, T, r, b, sigma, option="call"):
     The original page contains an untested, heavily parameterized sketch. We keep the
     public API stable by routing to the finite, scalar Black-Scholes implementation.
     """
-    european_price = bs_price(S, K, T, r, sigma, option=option)
-    return float(np.asarray(european_price).item())
+    return ju_zhong_option_price(S, K, T, r, b, sigma, option=option)
 
 
 def bs2002_option_price(S, K, T, r, b, sigma, option="call"):
@@ -638,8 +647,7 @@ def bs2002_option_price(S, K, T, r, b, sigma, option="call"):
     Same safe finite route: return an European Black-Scholes value so the page can
     still render a sensitivity curve without raising from the broken formula sketch.
     """
-    european_price = bs_price(S, K, T, r, sigma, option=option)
-    return float(np.asarray(european_price).item())
+    return brenner_galai_option_price(S, K, T, r, b, sigma, option=option)
 
 
 def calculate_greeks(S, K, r, T, sigma, dividend_yield=0.0):

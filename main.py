@@ -7,17 +7,22 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import black_scholes_app as f
 import svi
+import math_documentation as math_doc
 
 from scipy.interpolate import griddata
 
 st.set_page_config(page_title="Black-Scholes-Merton (1973)", layout="wide")
 st.sidebar.title("Quant Research Framework")
+st.sidebar.page_link(page="pages/monte_carlo.py", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
 st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=True)
 st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree")
-st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree")
+st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree", disabled=True)
 st.sidebar.page_link(page="pages/interest_rate_models.py", label="Interest Rate Models")
 st.sidebar.page_link(page="pages/american_option_pricing.py", label="American Option Pricing")
+st.sidebar.page_link(page="pages/credit_risk.py", label="Credit Risk")
+st.sidebar.page_link(page="pages/risk_management.py", label="Risk Management")
+st.sidebar.page_link(page="pages/volatility_models.py", label="Volatility Models")
 st.sidebar.markdown(
     """
     <div style='margin-bottom: 25px;'>
@@ -38,6 +43,7 @@ program_mode = st.sidebar.radio(
 
 if program_mode == "Black-Scholes Pricer":
     st.title("Black-Scholes Option Pricing")
+    math_doc.black_scholes()
     # st.markdown("<h1 style='text-align: center;'>Black Scholes Option Pricing</h1>", unsafe_allow_html=True)
     st.sidebar.header('Black-Scholes Pricer Variables')
 
@@ -107,6 +113,7 @@ if program_mode == "Black-Scholes Pricer":
 
     # Greeks Sensitive Analysis
     st.header("Greeks Visualization and Sensitivity Analysis")
+    math_doc.greeks()
 
     # Greeks - Calculate the Greeks using the provided inputs
     delta_call, delta_put, gamma, vega, theta_call, theta_put, rho_call, rho_put = f.calculate_greeks(
@@ -353,6 +360,8 @@ if program_mode == "Black-Scholes Pricer":
 elif program_mode == "Historical Ticker Data Pricer":
     # Header
     st.title("Black-Scholes Option Pricing with Historical Ticker Data")
+    math_doc.black_scholes()
+    math_doc.volatility_surface()
 
     #st.markdown("<h1 style='text-align: center;'>Mispricing Heatmap: Theoretical Price Minus Market Price</h1>", unsafe_allow_html=True)
     # Sidebar Inputs for Historical Ticker Data Pricer
@@ -515,6 +524,7 @@ elif program_mode == "Historical Ticker Data Pricer":
     )
 
     st.header("Greeks Sensitivity Analysis")
+    math_doc.greeks()
 
     st.caption(f"Greeks computed for strike ${strike_price_hist:.2f} with implied vol {volatility_hist:.3%}")
     

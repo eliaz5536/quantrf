@@ -7,37 +7,43 @@ import matplotlib.pyplot as plt
 import streamlit as st
 import black_scholes_app as f
 import svi
+import math_documentation as math_doc
 
 from scipy.interpolate import griddata
 
 st.set_page_config(page_title="Black (1976)", layout="wide")
 st.sidebar.title("Quant Research Framework")
+st.sidebar.page_link(page="pages/monte_carlo.py", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
-st.sidebar.page_link(page="pages/black.py", label="Black (1976)")
+st.sidebar.page_link(page="pages/black.py", label="Black (1976)", disabled=True)
 st.sidebar.page_link(page="pages/binomial_tree.py", label="Binomial Tree")
-st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree")
+st.sidebar.page_link(page="pages/trinomial_tree.py", label="Trinomial Tree", disabled=True)
 st.sidebar.page_link(page="pages/interest_rate_models.py", label="Interest Rate Models")
 st.sidebar.page_link(page="pages/american_option_pricing.py", label="American Option Pricing")
-
+st.sidebar.page_link(page="pages/credit_risk.py", label="Credit Risk")
+st.sidebar.page_link(page="pages/risk_management.py", label="Risk Management")
+st.sidebar.page_link(page="pages/volatility_models.py", label="Volatility Models")
 st.sidebar.markdown(
     """
     <div style='margin-bottom: 25px;'>
+        <!-- <span style='font-weight: bold; font-size: 18px;'>Created by:</span><br> -->
         <a href='https://www.linkedin.com/in/eliaz-simon/' target='_blank' style='text-decoration: none; display: flex; align-items: center; gap: 12px; margin-top: 8px;'>
             <img src='https://cdn-icons-png.flaticon.com/512/174/174857.png' width='32' height='32'/>
             <span style='color: #0A66C2; font-size: 18px; font-weight: bold;'>Eliaz Simon</span>
         </a>
     </div>
     """,
-    unsafe_allow_html=True,
+    unsafe_allow_html=True
 )
 
 program_mode = st.sidebar.radio(
     'Select Program Mode:',
-    ('Black Pricer', 'Historical Ticker Data Pricer')
+    ('Black (1976) Pricer', 'Historical Ticker Data Pricer')
 )
 
 if program_mode == "Black (1976) Pricer":
     st.title("Black (1976) Pricer")
+    math_doc.black_scholes("black76")
     # st.caption("Forward-based option pricing (Black 1976) with heatmaps and implied volatility.)")
 
     st.sidebar.header('Black-Scholes Pricer Variables')
@@ -107,6 +113,7 @@ if program_mode == "Black (1976) Pricer":
 
     # Greeks Sensitive Analysis
     st.header("Greeks Visualization and Sensitivity Analysis")
+    math_doc.greeks("black76")
 
     # Greeks - Calculate the Greeks using the provided inputs
     delta_call, delta_put, gamma, vega, theta_call, theta_put, rho_call, rho_put = f.calculate_black_greeks(
@@ -352,6 +359,8 @@ if program_mode == "Black (1976) Pricer":
 elif program_mode == "Historical Ticker Data Pricer":
     # Header
     st.title("Black Option Pricing with Historical Ticker Data")
+    math_doc.black_scholes("black76")
+    math_doc.volatility_surface()
 
     #st.markdown("<h1 style='text-align: center;'>Mispricing Heatmap: Theoretical Price Minus Market Price</h1>", unsafe_allow_html=True)
     # Sidebar Inputs for Historical Ticker Data Pricer
@@ -473,6 +482,7 @@ elif program_mode == "Historical Ticker Data Pricer":
     )
 
     st.header("Greeks Sensitivity Analysis")
+    math_doc.greeks("black76")
 
     st.caption(f"Greeks computed for strike ${strike_price_hist:.2f} with implied vol {volatility_hist:.3%}")
 

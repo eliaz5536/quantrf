@@ -1,16 +1,9 @@
+import numpy as np
 import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import matplotlib.pyplot as plt
 import streamlit as st
 import black_scholes_app as f
-import svi
-import math_documentation as math_doc
 
-from scipy.interpolate import griddata
-
-st.set_page_config(page_title="Black (1976)", layout="wide")
+st.set_page_config(page_title="Volatility Models", layout="wide")
 st.sidebar.title("Quant Research Framework")
 st.sidebar.page_link(page="pages/monte_carlo.py", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
@@ -35,6 +28,29 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-st.title("Trinomial Tree Model")
-math_doc.trinomial()
-st.info("The trinomial pricing implementation is not yet connected to this page.")
+st.title("GARCH(1,1) Volatility Model")
+st.markdown("GARCH models allow volatility to cluster: large shocks tend to be followed by large shocks, and calm periods tend to persist.")
+
+sample_size = st.sidebar.slider("Synthetic Return Observations", 100, 3000, 750, 50)
+horizon = st.sidebar.slider("Forecast Horizon", 1, 30, 10)
+rng = np.random.default_rng(7)
+returns = rng.normal(0.0002, 0.012, sample_size)
+fit = f.fit_garch11(returns)
+forecast = f.forecast_garch11(fit, horizon)
+
+st.latex(r"h_t=\omega+\alpha\epsilon_{t-1}^2+\beta h_{t-1}")
+st.latex(r"\alpha+\beta<1\quad\Rightarrow\quad\text{finite long-run variance}")
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Omega", f"{fit['omega']:.6g}")
+col2.metric("Alpha", f"{fit['alpha']:.4f}")
+col3.metric("Beta", f"{fit['beta']:.4f}")
+col4.metric("Persistence", f"{fit['alpha'] + fit['beta']:.4f}")
+
+conditional = pd.DataFrame({"Conditional Volatility": fit["conditional_volatility"]})
+st.subheader("Estimated Conditional Volatility")
+st.line_chart(conditional)
+forecast_frame = pd.DataFrame({"Forecast Volatility": np.sqrt(forecast)}, index=np.arange(1, horizon + 1))
+forecast_frame.index.name = "Forecast Step"
+st.subheader("Volatility Forecast")
+st.line_chart(forecast_frame)
+st.caption("Alpha measures the immediate response to a return shock. Beta measures volatility persistence. A persistence value near one implies slow mean reversion of volatility.")
