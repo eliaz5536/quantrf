@@ -79,6 +79,20 @@ Visualize three-dimensional implied volatility surface to understand how option 
 
 <img width="1450" height="800" alt="image-8" src="https://github.com/user-attachments/assets/5c357ea1-76ed-4425-ba7c-ef425fe0dc51" />
 
+### Binomial Trees
+
+<img width="1460" height="1016" alt="ce79da3884a571f5ca20f102ba0fabbd" src="https://github.com/user-attachments/assets/56aa145a-dc19-4e0b-8e89-4f16e07ff61e" />
+
+<img width="1460" height="1031" alt="77a2692949354623966bb837baa112dc" src="https://github.com/user-attachments/assets/3cc20e49-cad5-4ca8-a102-a0f2c2929c57" />
+
+<img width="1460" height="1031" alt="5d3cc5ab0fc8a3dd1b3ddc3e5bd6322b" src="https://github.com/user-attachments/assets/18903ff6-c8d9-45b7-9b99-02ed000b6643" />
+
+### Credit Risk Models
+Evaluate the firm's asset using KMV-Merton Structural Credit Risk Model to determine when the asset value is below the debt face value at maturity.
+
+### Risk Management
+Determine the loss distribution by calculating the value at risk (VaR).
+
 ---
 
 # Tech Stack
