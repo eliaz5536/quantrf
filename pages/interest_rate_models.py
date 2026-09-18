@@ -16,6 +16,7 @@ st.sidebar.page_link(page="pages/american_option_pricing.py", label="American Op
 st.sidebar.page_link(page="pages/credit_risk.py", label="Credit Risk")
 st.sidebar.page_link(page="pages/risk_management.py", label="Risk Management")
 st.sidebar.page_link(page="pages/volatility_models.py", label="Volatility Models")
+st.sidebar.page_link(page="pages/references.py", label="References")
 st.sidebar.markdown(
     """
     <div style='margin-bottom: 25px;'>

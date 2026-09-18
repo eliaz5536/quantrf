@@ -17,6 +17,7 @@ st.sidebar.page_link(page="pages/american_option_pricing.py", label="American Op
 st.sidebar.page_link(page="pages/credit_risk.py", label="Credit Risk")
 st.sidebar.page_link(page="pages/risk_management.py", label="Risk Management")
 st.sidebar.page_link(page="pages/volatility_models.py", label="Volatility Models")
+st.sidebar.page_link(page="pages/references.py", label="References")
 st.sidebar.markdown(
     """
     <div style='margin-bottom: 25px;'>
@@ -35,7 +36,7 @@ model = st.sidebar.radio(
     "Select American Approximation Model:",
     ("Bjerksund-Stensland 1993", "Bjerksund-Stensland 2002", "Ju-Zhong 1999", "Brenner-Galai 1989"),
 )
-math_doc.american_options(model.split()[-1])
+# math_doc.american_options(model)
 
 S0 = st.sidebar.number_input("Spot Price", value=100.0, format="%.2f")
 K = st.sidebar.number_input("Strike", value=100.0, format="%.2f")

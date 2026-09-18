@@ -1,6 +1,5 @@
 import streamlit as st
 
-
 def _section(title, purpose, equations, terms, behaviour):
     with st.expander(title, expanded=True):
         st.markdown(purpose)
@@ -210,7 +209,7 @@ def american_options(model):
     )
 
     descriptions = {
-        "1993": (
+        "Bjerksund-Stensland 1993": (
             "Bjerksund-Stensland (1993) mathematics",
             "The 1993 approximation represents early exercise with a flat critical boundary. It replaces the unknown optimal stopping surface with a tractable exercise trigger and an analytic continuation value.",
             [
@@ -222,7 +221,7 @@ def american_options(model):
             common_terms + r" The boundary $B$ is chosen using value matching and smooth pasting; $\operatorname{EEP}$ is the early-exercise premium.",
             "The approximation is most sensitive to the estimated boundary. A call is more likely to be exercised early when carry is low, especially when dividends reduce the benefit of continuing to hold the option.",
         ),
-        "2002": (
+        "Bjerksund-Stensland 2002": (
             "Bjerksund-Stensland (2002) mathematics",
             "The 2002 approximation improves the exercise-boundary representation by using a time-dependent trigger. The option is valued as a European option plus the value of exercising optimally at the approximated boundary.",
             [
@@ -234,7 +233,7 @@ def american_options(model):
             common_terms + r" $B(t)$ is the time-dependent critical boundary, $B_0$ and $B_\infty$ describe its endpoint levels, and $\lambda$ controls its transition toward maturity.",
             "The moving boundary captures the fact that the optimal exercise level changes as maturity approaches. Early exercise remains most relevant for dividend-paying calls and sufficiently in-the-money puts.",
         ),
-        "1999": (
+        "Ju-Zhong 1999": (
             "Ju-Zhong (1999) mathematics",
             "Ju-Zhong adds an early-exercise premium to the European option value and calibrates that premium to an approximated exercise boundary. In this application the calculation is evaluated with a refined American lattice using the Ju-Zhong model label.",
             [
@@ -246,7 +245,7 @@ def american_options(model):
             common_terms + r" $\mathbb{Q}$ is the risk-neutral measure, $N$ is the number of lattice steps, and $u$, $d$, and $p$ are the up factor, down factor, and risk-neutral probability.",
             "The lattice checks exercise at every node, so the value is the greater of immediate exercise and discounted continuation. Increasing the number of steps generally reduces lattice discretisation error.",
         ),
-        "1989": (
+        "Brenner-Galai 1989": (
             "Brenner-Galai (1989) mathematics",
             "The Brenner-Galai approach expresses an American option as a European value plus an early-exercise correction. In this application the correction is obtained through the same refined early-exercise lattice used by the numerical approximation.",
             [
@@ -260,9 +259,7 @@ def american_options(model):
         ),
     }
 
-    title, purpose, equations, terms, behaviour = descriptions.get(
-        str(model), descriptions["1993"]
-    )
+    title, purpose, equations, terms, behaviour = descriptions[str(model)]
     _section(title, purpose, equations, terms, behaviour)
 
 
