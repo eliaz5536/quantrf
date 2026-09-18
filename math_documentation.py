@@ -203,17 +203,67 @@ def interest_rates(model):
 
 
 def american_options(model):
-    _section(
-        f"Bjerksund-Stensland ({model}) mathematics",
-        "American options may be exercised before maturity, so their value is the maximum of immediate exercise and continuation value. The Bjerksund-Stensland method approximates the optimal exercise boundary in a closed-form framework.",
-        [
-            r"V_{\mathrm{Am}}(S,t)=\max\left(\Pi(S),\;e^{-r\Delta t}\mathbb{E}^{\mathbb{Q}}[V_{\mathrm{Am}}(S_{t+\Delta t},t+\Delta t)\mid S_t=S]\right)",
-            r"\Pi_C(S)=\max(S-K,0),\qquad \Pi_P(S)=\max(K-S,0)",
-            r"V_{\mathrm{Am}}(S,t)\approx V_{\mathrm{BS}}(S,t)+\text{early-exercise premium}",
-        ],
-        r"$\Pi$ is immediate exercise payoff, $\mathbb{Q}$ is the risk-neutral measure, and the early-exercise premium represents the value of retaining the right to exercise before maturity. The page parameters use $b$ for cost of carry.",
-        "For an American call, early exercise becomes more attractive when carry is low and dividends make holding the underlying valuable. For an American put, early exercise becomes more attractive when the option is deep in the money or interest rates are high. The page now exposes Bjerksund-Stensland, Ju-Zhong, and Brenner-Galai names through refined early-exercise lattice valuations.",
+    common_terms = (
+        r"$S$ is spot, $K$ is strike, $T$ is maturity, $r$ is the risk-free "
+        r"rate, $b$ is cost of carry, $\sigma$ is volatility, $N$ is the "
+        r"normal CDF, and $\Pi$ is immediate exercise payoff."
     )
+
+    descriptions = {
+        "1993": (
+            "Bjerksund-Stensland (1993) mathematics",
+            "The 1993 approximation represents early exercise with a flat critical boundary. It replaces the unknown optimal stopping surface with a tractable exercise trigger and an analytic continuation value.",
+            [
+                r"\Pi_C(S)=\max(S-K,0),\qquad \Pi_P(S)=\max(K-S,0)",
+                r"V_{\mathrm{Am}}(S)\approx V_{\mathrm{BS}}(S)+\operatorname{EEP}(S;B)",
+                r"\text{exercise when }S\geq B\text{ for a call},\qquad \text{exercise when }S\leq B\text{ for a put}",
+                r"B=\text{critical exercise price},\qquad V(B)=\Pi(B),\quad \frac{\partial V}{\partial S}(B)=\frac{\partial\Pi}{\partial S}(B)",
+            ],
+            common_terms + r" The boundary $B$ is chosen using value matching and smooth pasting; $\operatorname{EEP}$ is the early-exercise premium.",
+            "The approximation is most sensitive to the estimated boundary. A call is more likely to be exercised early when carry is low, especially when dividends reduce the benefit of continuing to hold the option.",
+        ),
+        "2002": (
+            "Bjerksund-Stensland (2002) mathematics",
+            "The 2002 approximation improves the exercise-boundary representation by using a time-dependent trigger. The option is valued as a European option plus the value of exercising optimally at the approximated boundary.",
+            [
+                r"V_{\mathrm{Am}}(S,t)\approx V_{\mathrm{BS}}(S,t)+\operatorname{EEP}(S,t;B(t))",
+                r"B(t)=B_0+(B_\infty-B_0)\left(1-e^{-\lambda(T-t)}\right)",
+                r"\Pi_C(S)=\max(S-K,0),\qquad \Pi_P(S)=\max(K-S,0)",
+                r"V(B(t),t)=\Pi(B(t)),\qquad V_S(B(t),t)=\Pi_S(B(t))",
+            ],
+            common_terms + r" $B(t)$ is the time-dependent critical boundary, $B_0$ and $B_\infty$ describe its endpoint levels, and $\lambda$ controls its transition toward maturity.",
+            "The moving boundary captures the fact that the optimal exercise level changes as maturity approaches. Early exercise remains most relevant for dividend-paying calls and sufficiently in-the-money puts.",
+        ),
+        "1999": (
+            "Ju-Zhong (1999) mathematics",
+            "Ju-Zhong adds an early-exercise premium to the European option value and calibrates that premium to an approximated exercise boundary. In this application the calculation is evaluated with a refined American lattice using the Ju-Zhong model label.",
+            [
+                r"V_{\mathrm{Am}}=V_{\mathrm{Eur}}+\operatorname{EEP}",
+                r"V_{\mathrm{Am}}(S,t)=\max\left(\Pi(S),\;e^{-r\Delta t}\mathbb{E}^{\mathbb{Q}}[V_{\mathrm{Am}}(S_{t+\Delta t},t+\Delta t)\mid S_t=S]\right)",
+                r"u=e^{\sigma\sqrt{\Delta t}},\qquad d=u^{-1},\qquad \Delta t=T/N",
+                r"p=\frac{e^{b\Delta t}-d}{u-d},\qquad V_{j,i}=\max\left(\Pi(S_{j,i}),e^{-r\Delta t}[pV_{j+1,i}+(1-p)V_{j+1,i+1}]\right)",
+            ],
+            common_terms + r" $\mathbb{Q}$ is the risk-neutral measure, $N$ is the number of lattice steps, and $u$, $d$, and $p$ are the up factor, down factor, and risk-neutral probability.",
+            "The lattice checks exercise at every node, so the value is the greater of immediate exercise and discounted continuation. Increasing the number of steps generally reduces lattice discretisation error.",
+        ),
+        "1989": (
+            "Brenner-Galai (1989) mathematics",
+            "The Brenner-Galai approach expresses an American option as a European value plus an early-exercise correction. In this application the correction is obtained through the same refined early-exercise lattice used by the numerical approximation.",
+            [
+                r"V_{\mathrm{Am}}=V_{\mathrm{Eur}}+\operatorname{EEP}",
+                r"\operatorname{EEP}=\sup_{\tau\leq T}\mathbb{E}^{\mathbb{Q}}\left[e^{-r\tau}\Pi(S_\tau)\right]-V_{\mathrm{Eur}}",
+                r"V_{j,i}=\max\left(\Pi(S_{j,i}),e^{-r\Delta t}[pV_{j+1,i}+(1-p)V_{j+1,i+1}]\right)",
+                r"S_{j,i}=S_0u^{j-i}d^i,\qquad u=e^{\sigma\sqrt{\Delta t}},\quad d=u^{-1}",
+            ],
+            common_terms + r" $\tau$ is an exercise time, $S_{j,i}$ is a lattice node, and $\operatorname{EEP}$ is the value of the early-exercise right above the European contract.",
+            "The exercise feature creates an upper envelope over continuation and intrinsic value. The premium is usually larger for deep-in-the-money puts and for calls when dividends make early exercise economically attractive.",
+        ),
+    }
+
+    title, purpose, equations, terms, behaviour = descriptions.get(
+        str(model), descriptions["1993"]
+    )
+    _section(title, purpose, equations, terms, behaviour)
 
 
 def monte_carlo(mode):
