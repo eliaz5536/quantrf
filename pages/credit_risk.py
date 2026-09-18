@@ -10,7 +10,7 @@ from credit_models import (
     solve_asset_value,
 )
 
-st.set_page_config(page_title="Credit Risk", layout="wide")
+st.set_page_config(page_title="Credit Risk", layout="wide", page_icon="quantrf_logo_website.png")
 st.sidebar.title("Quant Research Framework")
 st.sidebar.page_link(page="pages/monte_carlo.py", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")

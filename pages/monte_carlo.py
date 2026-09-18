@@ -3,7 +3,7 @@ import pandas as pd
 import streamlit as st
 import math_documentation as math_doc
 
-st.set_page_config(page_title="Monte Carlo Simulation", layout="wide")
+st.set_page_config(page_title="Monte Carlo Simulation", layout="wide", page_icon="quantrf_logo_website.png")
 st.sidebar.title("Quant Research Framework")
 st.sidebar.page_link(page="pages/monte_carlo.py", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")

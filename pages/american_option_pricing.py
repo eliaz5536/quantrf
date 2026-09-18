@@ -5,7 +5,7 @@ import black_scholes_app as f
 import math_documentation as math_doc
 from american_models import ju_zhong_option_price, brenner_galai_option_price
 
-st.set_page_config(page_title="American Option Pricing", layout="wide")
+st.set_page_config(page_title="American Option Pricing", layout="wide", page_icon="quantrf_logo_website.png")
 st.sidebar.title("Quant Research Framework")
 st.sidebar.page_link(page="pages/monte_carlo.py", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")

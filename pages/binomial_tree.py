@@ -36,8 +36,7 @@ def plot_model_sensitivity_curve(model_name, call_solver, put_solver, S0, K, T, 
     st.subheader(f'{model_name} Model Sensitivity Curve')
     st.line_chart(curve_df.set_index('Spot Price'))
 
-
-st.set_page_config(page_title="Black (1976)", layout="wide")
+st.set_page_config(page_title="Binomial Tree", layout="wide", page_icon="quantrf_logo_website.png")
 st.sidebar.title("Quant Research Framework")
 st.sidebar.page_link(page="pages/monte_carlo.py", label="Monte Carlo")
 st.sidebar.page_link(page="main.py", label="Black-Scholes-Merton (1973)")
