@@ -7,13 +7,6 @@ The project extends and uses [**Georgios Drosogiannis**](https://github.com/Geor
 
 ---
 
-
-<h1 align="center">
-  🚧 Work in Progress 🚧 
-</h1>
-
----
-
 # Features
 
 ### Interactive Option Pricing
@@ -106,34 +99,13 @@ Visualize three-dimensional implied volatility surface to understand how option 
 
 ## Suggestions & Future Work
 
-The Quant Research Framework is intended to evolve into a comprehensive quantitative finance platform that supports financial modelling, derivative pricing, risk management, and market research. Future development will focus on expanding the framework with additional mathematical models, numerical methods, and financial analytics commonly used in both academia and industry.
+The Quant Research Framework is intended to evolve into a comprehensive quantitative finance platform that supports financial modelling, derivative pricing, risk management, and market research. Future development will focus on expanding the framework with additional mathematical models, numerical methods, and financial analytics commonly used in both academia and industry. The following fields that need to be reviewed and focused on are the following:
 
-### Stochastic Processes & Asset Price Models
-Future implementations may include:
-- Geometric Brownian Motion (GBM)
-- Black (1976) Futures Option Pricing Model
-- Monte Carlo Simulation Methods
-- GARCH (Generalised Autoregressive Conditional Heteroskedasticity) Models
-
-### European Option Pricing & Lattice Models
-Additoinal pricing models and numerical methods include:
-- Cox-Ross-Rubinstein (1979) Binomial Tree Model
-- Jarrow-Rudd (1983) Binomial Model
-- Tian (1993) Binomial Tree Model
-- Leisen-Reimer (1996) Binomial Tree Model
-- Figlewski and Gao (1999) Adaptive Mesh Model
-- Hull and White (2004) Finite Difference Methods
-
-### American Option Pricing
-Support for early exercise methods, including:
-- Bjerksund-Stensland (1993)
-- Brenner and Galai (1989)
-- Ju-Zhong (1999)
-- Bjerksund-Stensland (2002)
+### Mathematical Notation and Description
+The mathematical description can be simplified to make it easy-to-read and easier to understand through understanding each term of the mathematical model.
 
 ### Credit Risk Modelling
 Implemented credit risk analytics include:
-- KMV-Merton Structural Credit Risk Model
 - Probability of Default (PD)
 - Credit Spread Analysis
 - Structural and Reduced-Form Credit Risk Models
@@ -141,19 +113,20 @@ Implemented credit risk analytics include:
 ### Volatility & Risk Analytics
 Implemented volatility and risk analytics include:
 - Variance-Covariance Matrix
-- Historical Volatility
-- Implied Volatility Surface Construction
 - Volatility Smile and Skew Analysis
 - Covariance and Correlation Analysis
 - Principal Component Analysis (PCA)
-- Valute at Risk (VaR)
-- Conditional Value at Risk (CVaR)
-- GARCH(1,1) volatility estimation and forecasting
 
 ## Credits
 The following projects provided valuable inspiration and reference implementaitons during the development of this frameowrk:
 - [**Georgios Drosogiannis's**](https://github.com/George-Dros) [Volatility Surface Visualisation](https://github.com/George-Dros/Volatility_Surface) and [Interactive Black-Scholes Heatmaps](https://github.com/George-Dros/Black-Scholes-Interactive-heatmap)
 - [**Killa Voillaume's**](https://github.com/KilianVoillaume) [Options Greek Visualizer](https://github.com/KilianVoillaume/Greeks_Streamlit_APP/tree/main).
+
+## References
+The following materials that were used to produce the descriptions are the following:
+- Sinclair, E., 2010. Option trading: Pricing and volatility strategies and techniques. John Wiley & Sons.
+- Passarelli, D., 2012. Trading options Greeks: How time, volatility, and other pricing factors drive profits. John Wiley & Sons.
+- McMillan, L.G., 2002. Study Guide for the 4th Edition of Options as a Strategic Investment. Penguin.
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
