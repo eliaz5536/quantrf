@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import streamlit as st
-import black_scholes_app as f
+from risk_models import historical_cvar, historical_var, parametric_cvar, parametric_var
 
 st.set_page_config(page_title="Risk Management", layout="wide", page_icon="quantrf_logo_website.png")
 st.sidebar.title("Quant Research Framework")
@@ -36,13 +36,13 @@ portfolio_value = st.sidebar.number_input("Portfolio Value", min_value=0.0, valu
 rng = np.random.default_rng(42)
 returns = rng.normal(0.0003, 0.012, 1000)
 if method == "Historical":
-    var = f.historical_var(returns, confidence, portfolio_value)
-    cvar = f.historical_cvar(returns, confidence, portfolio_value)
+    var = historical_var(returns, confidence, portfolio_value)
+    cvar = historical_cvar(returns, confidence, portfolio_value)
 else:
     mean_return = float(returns.mean())
     volatility = float(returns.std(ddof=1))
-    var = f.parametric_var(mean_return, volatility, confidence, portfolio_value)
-    cvar = f.parametric_cvar(mean_return, volatility, confidence, portfolio_value)
+    var = parametric_var(mean_return, volatility, confidence, portfolio_value)
+    cvar = parametric_cvar(mean_return, volatility, confidence, portfolio_value)
 
 st.latex(r"VaR_\alpha=\inf\{\ell:P(L\leq\ell)\geq\alpha\}")
 st.latex(r"CVaR_\alpha=E[L\mid L\geq VaR_\alpha]")
