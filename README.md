@@ -1,5 +1,6 @@
 # Quant Research Framework (QRF)
-![alt text](image.png)
+<img width="1920" height="857" alt="quantrf_logo" src="https://github.com/user-attachments/assets/f89f68cc-1912-4f2f-895b-1bbe5d013dbd" />
+
 Interactive open-source quantitative finance platform for exploring financial models, analysing market data, and visualizations of option pricing and risk analysis using Streamlit.
 
 The project extends and uses [**Georgios Drosogiannis**](https://github.com/George-Dros) on [volatility surface visualisation](https://github.com/George-Dros/Volatility_Surface) and [interactive Black-Scholes heatmaps](https://github.com/George-Dros/Black-Scholes-Interactive-heatmap), together with [**Killa Voillaume's**](https://github.com/KilianVoillaume) [Options Greek Visualizer](https://github.com/KilianVoillaume/Greeks_Streamlit_APP/tree/main).
