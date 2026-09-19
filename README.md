@@ -1,4 +1,5 @@
-# Quant Research Framework (QRF)
+<center><h1>QuantRF</h1></center>
+
 <img width="1920" height="857" alt="quantrf_logo" src="https://github.com/user-attachments/assets/f89f68cc-1912-4f2f-895b-1bbe5d013dbd" />
 
 Interactive open-source quantitative finance platform for exploring financial models, analysing market data, and visualizations of option pricing and risk analysis using Streamlit.
@@ -79,6 +80,20 @@ Visualize three-dimensional implied volatility surface to understand how option 
 
 <img width="1450" height="800" alt="image-8" src="https://github.com/user-attachments/assets/5c357ea1-76ed-4425-ba7c-ef425fe0dc51" />
 
+### Binomial Trees
+
+<img width="1460" height="921" alt="44cae6bee9d41d753cd72cd507bd311a" src="https://github.com/user-attachments/assets/75afac9c-b374-43f6-8827-2beee62d719a" />
+
+<img width="1460" height="1031" alt="77a2692949354623966bb837baa112dc" src="https://github.com/user-attachments/assets/3cc20e49-cad5-4ca8-a102-a0f2c2929c57" />
+
+<img width="1460" height="1031" alt="5d3cc5ab0fc8a3dd1b3ddc3e5bd6322b" src="https://github.com/user-attachments/assets/18903ff6-c8d9-45b7-9b99-02ed000b6643" />
+
+### Credit Risk Models
+Evaluate the firm's asset using KMV-Merton Structural Credit Risk Model to determine when the asset value is below the debt face value at maturity.
+
+### Risk Management
+Determine the loss distribution by calculating the value at risk (VaR).
+
 ---
 
 # Tech Stack
@@ -105,17 +120,24 @@ The Quant Research Framework is intended to evolve into a comprehensive quantita
 The mathematical description can be simplified to make it easy-to-read and easier to understand through understanding each term of the mathematical model.
 
 ### Credit Risk Modelling
-Implemented credit risk analytics include:
+Credit risk analytics models can be expanded including:
 - Probability of Default (PD)
 - Credit Spread Analysis
 - Structural and Reduced-Form Credit Risk Models
 
 ### Volatility & Risk Analytics
-Implemented volatility and risk analytics include:
+Volatility and risk analytics can be explored in depth including:
 - Variance-Covariance Matrix
 - Volatility Smile and Skew Analysis
 - Covariance and Correlation Analysis
 - Principal Component Analysis (PCA)
+
+### Excel Spreadsheet
+The use of examples through Spreadsheet can make the following method easy to follow and accessible for those who do not use Python.
+These examples can be derived from CFA as a prime example.
+
+### Further Models supported from Research Papers
+Popular models that are further supported from research papers in the field of finance and economics can be modelled and implemented.
 
 ## Credits
 The following projects provided valuable inspiration and reference implementaitons during the development of this frameowrk:
