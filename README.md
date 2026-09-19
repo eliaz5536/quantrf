@@ -1,4 +1,5 @@
-# Quant Research Framework (QRF)
+<center><h1>QuantRF</h1></center>
+
 <img width="1920" height="857" alt="quantrf_logo" src="https://github.com/user-attachments/assets/f89f68cc-1912-4f2f-895b-1bbe5d013dbd" />
 
 Interactive open-source quantitative finance platform for exploring financial models, analysing market data, and visualizations of option pricing and risk analysis using Streamlit.
@@ -119,17 +120,21 @@ The Quant Research Framework is intended to evolve into a comprehensive quantita
 The mathematical description can be simplified to make it easy-to-read and easier to understand through understanding each term of the mathematical model.
 
 ### Credit Risk Modelling
-Implemented credit risk analytics include:
+Credit risk analytics models can be expanded including:
 - Probability of Default (PD)
 - Credit Spread Analysis
 - Structural and Reduced-Form Credit Risk Models
 
 ### Volatility & Risk Analytics
-Implemented volatility and risk analytics include:
+Volatility and risk analytics can be explored in depth including:
 - Variance-Covariance Matrix
 - Volatility Smile and Skew Analysis
 - Covariance and Correlation Analysis
 - Principal Component Analysis (PCA)
+
+### Excel Spreadsheet
+The use of examples through Spreadsheet can make the following method easy to follow and accessible for those who do not use Python.
+These examples can be derived from CFA as a prime example.
 
 ## Credits
 The following projects provided valuable inspiration and reference implementaitons during the development of this frameowrk:
