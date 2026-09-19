@@ -82,7 +82,7 @@ Visualize three-dimensional implied volatility surface to understand how option 
 
 ### Binomial Trees
 
-<img width="1460" height="1016" alt="ce79da3884a571f5ca20f102ba0fabbd" src="https://github.com/user-attachments/assets/56aa145a-dc19-4e0b-8e89-4f16e07ff61e" />
+<img width="1460" height="921" alt="44cae6bee9d41d753cd72cd507bd311a" src="https://github.com/user-attachments/assets/75afac9c-b374-43f6-8827-2beee62d719a" />
 
 <img width="1460" height="1031" alt="77a2692949354623966bb837baa112dc" src="https://github.com/user-attachments/assets/3cc20e49-cad5-4ca8-a102-a0f2c2929c57" />
 
