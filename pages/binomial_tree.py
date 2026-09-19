@@ -4,12 +4,38 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter, MaxNLocator
 import streamlit as st
 import black_scholes_app as f
 import svi
 import math_documentation as math_doc
 
 from scipy.interpolate import griddata
+
+plt.rcParams.update({
+    "figure.autolayout": True,
+    "axes.labelsize": 12,
+    "xtick.labelsize": 10,
+    "ytick.labelsize": 10,
+})
+
+
+def configure_tree_axes(ax, N):
+    """Use integer x ticks for time step and avoid decimal y labels on stock prices."""
+    ax.set_xlim(-0.1, N + 0.1)
+    ax.set_xticks(np.arange(0, N + 1, 1))
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"{int(round(x))}"))
+    ax.yaxis.set_major_locator(MaxNLocator(nbins=6, integer=True))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda y, pos: f"{int(round(y))}"))
+    ax.grid(True, alpha=0.3)
+
+
+def render_tree_figure(fig):
+    """Render a Matplotlib figure with layout space reserved for axis labels."""
+    fig.tight_layout(pad=1.5)
+    fig.subplots_adjust(left=0.12, right=0.98, bottom=0.12, top=0.9)
+    st.pyplot(fig)
+
 
 def plot_model_sensitivity_curve(model_name, call_solver, put_solver, S0, K, T, r, sigma, N):
     """Render a reusable Streamlit line-chart sensitivity surface for a public price solver.
@@ -84,58 +110,58 @@ if program_mode == 'Cox-Ross-Rubinstein':
     call_price, put_price, stock, call_tree, put_tree = f.crr_option_price(S0, K, T, r, sigma, N)
 
     # Plot stock price tree
-    fig = plt.figure(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     for j in range(N + 1):
         for i in range(j + 1):
-            plt.scatter(j, stock[i, j], s=60)
-            plt.text(j + 0.03, stock[i, j], f"{stock[i, j]:.1f}", fontsize=9)
+            ax.scatter(j, stock[i, j], s=60)
+            ax.text(j + 0.03, stock[i, j], f"{stock[i, j]:.1f}", fontsize=9)
 
     for j in range(N):
         for i in range(j + 1):
-            plt.plot([j, j + 1], [stock[i, j], stock[i, j + 1]], 'b')
-            plt.plot([j, j + 1], [stock[i, j], stock[i + 1, j + 1]], 'b')
+            ax.plot([j, j + 1], [stock[i, j], stock[i, j + 1]], 'b')
+            ax.plot([j, j + 1], [stock[i, j], stock[i + 1, j + 1]], 'b')
 
-    plt.title("CRR Stock Price Tree")
-    plt.xlabel("Time Step")
-    plt.ylabel("Stock Price")
-    plt.grid(True)
-    st.pyplot(fig)
+    ax.set_title("CRR Stock Price Tree")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Stock Price")
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
 
     # Plot call option value tree
-    fig = plt.figure(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     for j in range(N + 1):
         for i in range(j + 1):
-            plt.scatter(j, call_tree[i, j], color='red', s=60)
-            plt.text(j + 0.03, call_tree[i, j], f"{call_tree[i, j]:.2f}", fontsize=9)
+            ax.scatter(j, call_tree[i, j], color='red', s=60)
+            ax.text(j + 0.03, call_tree[i, j], f"{call_tree[i, j]:.2f}", fontsize=9)
 
     for j in range(N):
         for i in range(j + 1):
-            plt.plot([j, j + 1], [call_tree[i, j], call_tree[i, j + 1]], 'b')
-            plt.plot([j, j + 1], [call_tree[i, j], call_tree[i + 1, j + 1]], 'b')
+            ax.plot([j, j + 1], [call_tree[i, j], call_tree[i, j + 1]], 'b')
+            ax.plot([j, j + 1], [call_tree[i, j], call_tree[i + 1, j + 1]], 'b')
 
-    plt.title("European Call Option Value Tree")
-    plt.xlabel("Time Step")
-    plt.ylabel("Option Price")
-    plt.grid(True)
-    st.pyplot(fig)
+    ax.set_title("European Call Option Value Tree")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Option Price")
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
 
     # Plot put option value tree
-    fig = plt.figure(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     for j in range(N + 1):
         for i in range(j + 1):
-            plt.scatter(j, put_tree[i, j], color='green', s=60)
-            plt.text(j + 0.03, put_tree[i, j], f"{put_tree[i, j]:.2f}", fontsize=9)
+            ax.scatter(j, put_tree[i, j], color='green', s=60)
+            ax.text(j + 0.03, put_tree[i, j], f"{put_tree[i, j]:.2f}", fontsize=9)
 
     for j in range(N):
         for i in range(j + 1):
-            plt.plot([j, j + 1], [put_tree[i, j], put_tree[i, j + 1]], 'b')
-            plt.plot([j, j + 1], [put_tree[i, j], put_tree[i + 1, j + 1]], 'b')
+            ax.plot([j, j + 1], [put_tree[i, j], put_tree[i, j + 1]], 'b')
+            ax.plot([j, j + 1], [put_tree[i, j], put_tree[i + 1, j + 1]], 'b')
 
-    plt.title("European Put Option Value Tree")
-    plt.xlabel("Time Step")
-    plt.ylabel("Option Price")
-    plt.grid(True)
-    st.pyplot(fig)
+    ax.set_title("European Put Option Value Tree")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Option Price")
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
 
     # Display results
     st.subheader("Option Prices")
@@ -172,8 +198,8 @@ elif program_mode == 'Jarrow-Rudd':
     ax.set_title("Jarrow-Rudd Stock Price Tree")
     ax.set_xlabel("Time Step")
     ax.set_ylabel("Stock Price")
-    ax.grid(True)
-    st.pyplot(fig)
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
 
     # Plot call option value tree
     fig, ax = plt.subplots(figsize=(9, 6))
@@ -190,8 +216,8 @@ elif program_mode == 'Jarrow-Rudd':
     ax.set_title("European Call Option Value Tree")
     ax.set_xlabel("Time Step")
     ax.set_ylabel("Option Price")
-    ax.grid(True)
-    st.pyplot(fig)
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
     
     # Plot put option value tree
     fig, ax = plt.subplots(figsize=(9, 6))
@@ -208,8 +234,8 @@ elif program_mode == 'Jarrow-Rudd':
     ax.set_title("European Put Option Value Tree")
     ax.set_xlabel("Time Step")
     ax.set_ylabel("Option Price")
-    ax.grid(True)
-    st.pyplot(fig)
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
 
     # Display results
     st.subheader("Option Prices")
@@ -232,58 +258,58 @@ elif program_mode == 'Leisen-Reimer':
     call_price, put_price, stock, call_tree, put_tree = f.lr_option_price(S0, K, T, r, sigma, N)
 
     # Plot stock price tree
-    fig = plt.figure(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     for j in range(N + 1):
         for i in range(j + 1):
-            plt.scatter(j, stock[i, j], s=60)
-            plt.text(j + 0.03, stock[i, j], f"{stock[i, j]:.1f}", fontsize=9)
+            ax.scatter(j, stock[i, j], s=60)
+            ax.text(j + 0.03, stock[i, j], f"{stock[i, j]:.1f}", fontsize=9)
 
     for j in range(N):
         for i in range(j + 1):
-            plt.plot([j, j + 1], [stock[i, j], stock[i, j + 1]], 'b')
-            plt.plot([j, j + 1], [stock[i, j], stock[i + 1, j + 1]], 'b')
+            ax.plot([j, j + 1], [stock[i, j], stock[i, j + 1]], 'b')
+            ax.plot([j, j + 1], [stock[i, j], stock[i + 1, j + 1]], 'b')
 
-    plt.title("Leisen-Reimer Stock Price Tree")
-    plt.xlabel("Time Step")
-    plt.ylabel("Stock Price")
-    plt.grid(True)
-    st.pyplot(fig)
+    ax.set_title("Leisen-Reimer Stock Price Tree")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Stock Price")
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
 
     # Plot call option value tree
-    fig = plt.figure(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     for j in range(N + 1):
         for i in range(j + 1):
-            plt.scatter(j, call_tree[i, j], color='red', s=60)
-            plt.text(j + 0.03, call_tree[i, j], f"{call_tree[i, j]:.2f}", fontsize=9)
+            ax.scatter(j, call_tree[i, j], color='red', s=60)
+            ax.text(j + 0.03, call_tree[i, j], f"{call_tree[i, j]:.2f}", fontsize=9)
 
     for j in range(N):
         for i in range(j + 1):
-            plt.plot([j, j + 1], [call_tree[i, j], call_tree[i, j + 1]], 'b')
-            plt.plot([j, j + 1], [call_tree[i, j], call_tree[i + 1, j + 1]], 'b')
+            ax.plot([j, j + 1], [call_tree[i, j], call_tree[i, j + 1]], 'b')
+            ax.plot([j, j + 1], [call_tree[i, j], call_tree[i + 1, j + 1]], 'b')
 
-    plt.title("European Call Option Value Tree")
-    plt.xlabel("Time Step")
-    plt.ylabel("Option Price")
-    plt.grid(True)
-    st.pyplot(fig)
+    ax.set_title("European Call Option Value Tree")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Option Price")
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
     
     # Plot put option value tree
-    fig = plt.figure(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     for j in range(N + 1):
         for i in range(j + 1):
-            plt.scatter(j, put_tree[i, j], color='green', s=60)
-            plt.text(j + 0.03, put_tree[i, j], f"{put_tree[i, j]:.2f}", fontsize=9)
+            ax.scatter(j, put_tree[i, j], color='green', s=60)
+            ax.text(j + 0.03, put_tree[i, j], f"{put_tree[i, j]:.2f}", fontsize=9)
 
     for j in range(N):
         for i in range(j + 1):
-            plt.plot([j, j + 1], [put_tree[i, j], put_tree[i, j + 1]], 'b')
-            plt.plot([j, j + 1], [put_tree[i, j], put_tree[i + 1, j + 1]], 'b')
+            ax.plot([j, j + 1], [put_tree[i, j], put_tree[i, j + 1]], 'b')
+            ax.plot([j, j + 1], [put_tree[i, j], put_tree[i + 1, j + 1]], 'b')
 
-    plt.title("European Put Option Value Tree")
-    plt.xlabel("Time Step")
-    plt.ylabel("Option Price")
-    plt.grid(True)
-    st.pyplot(fig)
+    ax.set_title("European Put Option Value Tree")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Option Price")
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
 
     # Display results
     st.subheader("Option Prices")
@@ -306,58 +332,58 @@ elif program_mode == "Tian":
     call_price, put_price, stock, call_tree, put_tree = f.tian_option_price(S0, K, T, r, sigma, N)
 
     # Plot stock price tree
-    fig = plt.figure(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     for j in range(N + 1):
         for i in range(j + 1):
-            plt.scatter(j, stock[i, j], s=60)
-            plt.text(j + 0.03, stock[i, j], f"{stock[i, j]:.1f}", fontsize=9)
+            ax.scatter(j, stock[i, j], s=60)
+            ax.text(j + 0.03, stock[i, j], f"{stock[i, j]:.1f}", fontsize=9)
 
     for j in range(N):
         for i in range(j + 1):
-            plt.plot([j, j + 1], [stock[i, j], stock[i, j + 1]], 'b')
-            plt.plot([j, j + 1], [stock[i, j], stock[i + 1, j + 1]], 'b')
+            ax.plot([j, j + 1], [stock[i, j], stock[i, j + 1]], 'b')
+            ax.plot([j, j + 1], [stock[i, j], stock[i + 1, j + 1]], 'b')
 
-    plt.title("Tian Stock Price Tree")
-    plt.xlabel("Time Step")
-    plt.ylabel("Stock Price")
-    plt.grid(True)
-    st.pyplot(fig)
+    ax.set_title("Tian Stock Price Tree")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Stock Price")
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
 
     # Plot call option value tree
-    fig = plt.figure(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     for j in range(N + 1):
         for i in range(j + 1):
-            plt.scatter(j, call_tree[i, j], color='red', s=60)
-            plt.text(j + 0.03, call_tree[i, j], f"{call_tree[i, j]:.2f}", fontsize=9)
+            ax.scatter(j, call_tree[i, j], color='red', s=60)
+            ax.text(j + 0.03, call_tree[i, j], f"{call_tree[i, j]:.2f}", fontsize=9)
 
     for j in range(N):
         for i in range(j + 1):
-            plt.plot([j, j + 1], [call_tree[i, j], call_tree[i, j + 1]], 'b')
-            plt.plot([j, j + 1], [call_tree[i, j], call_tree[i + 1, j + 1]], 'b')
+            ax.plot([j, j + 1], [call_tree[i, j], call_tree[i, j + 1]], 'b')
+            ax.plot([j, j + 1], [call_tree[i, j], call_tree[i + 1, j + 1]], 'b')
 
-    plt.title("European Call Option Value Tree")
-    plt.xlabel("Time Step")
-    plt.ylabel("Option Price")
-    plt.grid(True)
-    st.pyplot(fig)
+    ax.set_title("European Call Option Value Tree")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Option Price")
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
     
     # Plot put option value tree
-    fig = plt.figure(figsize=(9, 6))
+    fig, ax = plt.subplots(figsize=(9, 6))
     for j in range(N + 1):
         for i in range(j + 1):
-            plt.scatter(j, put_tree[i, j], color='green', s=60)
-            plt.text(j + 0.03, put_tree[i, j], f"{put_tree[i, j]:.2f}", fontsize=9)
+            ax.scatter(j, put_tree[i, j], color='green', s=60)
+            ax.text(j + 0.03, put_tree[i, j], f"{put_tree[i, j]:.2f}", fontsize=9)
 
     for j in range(N):
         for i in range(j + 1):
-            plt.plot([j, j + 1], [put_tree[i, j], put_tree[i, j + 1]], 'b')
-            plt.plot([j, j + 1], [put_tree[i, j], put_tree[i + 1, j + 1]], 'b')
+            ax.plot([j, j + 1], [put_tree[i, j], put_tree[i, j + 1]], 'b')
+            ax.plot([j, j + 1], [put_tree[i, j], put_tree[i + 1, j + 1]], 'b')
 
-    plt.title("European Put Option Value Tree")
-    plt.xlabel("Time Step")
-    plt.ylabel("Option Price")
-    plt.grid(True)
-    st.pyplot(fig)
+    ax.set_title("European Put Option Value Tree")
+    ax.set_xlabel("Time Step")
+    ax.set_ylabel("Option Price")
+    configure_tree_axes(ax, N)
+    render_tree_figure(fig)
 
     # Display results
     st.subheader("Option Prices")
