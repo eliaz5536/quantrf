@@ -136,6 +136,9 @@ Volatility and risk analytics can be explored in depth including:
 The use of examples through Spreadsheet can make the following method easy to follow and accessible for those who do not use Python.
 These examples can be derived from CFA as a prime example.
 
+### Further Models supported from Research Papers
+Popular models that are further supported from research papers in the field of finance and economics can be modelled and implemented.
+
 ## Credits
 The following projects provided valuable inspiration and reference implementaitons during the development of this frameowrk:
 - [**Georgios Drosogiannis's**](https://github.com/George-Dros) [Volatility Surface Visualisation](https://github.com/George-Dros/Volatility_Surface) and [Interactive Black-Scholes Heatmaps](https://github.com/George-Dros/Black-Scholes-Interactive-heatmap)
